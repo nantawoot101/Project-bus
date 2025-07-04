@@ -1,0 +1,29 @@
+<div>
+    <link rel="stylesheet" href="app/view/map-bus/button-sheet/bus-travel/bus-travel.css" />
+
+    <div>
+        <md-bottom-sheet class="custom-bottom-sheet" ng-style="{ height: sheetHeight + 'vh' }"
+            ng-class="{ expanded: isExpanded }">
+            <div class="drag-handle" ng-mousedown="startDrag($event)" ng-touchstart="startDrag($event)"></div>
+            <div>เส้นทางทั้งหมด</div>
+
+            <md-list-item ng-repeat="station in station" ng-click="listItemClick($index)">
+                <div class="station-flex">
+                    <div class="station-box" ng-class="getBorderClass(station.transportation_id)">
+                        {{ getTransportationName(station.transportation_id) }}
+                    </div>
+
+                    <div class="station-arrow-destination">
+                        <img class="arrow-right" src="app/assets/icon/arrow-right.svg" />
+                        <div class="destination-info">
+                            <div class="font-gray">ปลายทาง</div>
+                            <div class="font-SL">{{ station.name }}</div>
+                        </div>
+                    </div>
+                </div>
+
+    </div>
+    </md-list-item>
+    </md-bottom-sheet>
+</div>
+</div>

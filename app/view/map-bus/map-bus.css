@@ -1,0 +1,97 @@
+
+.map-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+
+
+.blue-dot-halo {
+  width: 24px;             /* วงแหวนรอบนอกเล็กลง */
+  height: 24px;
+  background: white;
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 0 0 8px rgba(33, 150, 243, 0.6);
+}
+
+.blue-dot-halo::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;             /* จุดกลางสีฟ้าใหญ่ขึ้น */
+  height: 18px;
+  background: #2196f3;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+
+
+
+/* ส่วนของการค้นหา */
+.search-box {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  background: white;
+  border-radius: 8px;
+  padding: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  width: 20px;
+  height: 20px;
+  background-size: cover;
+  filter: brightness(0) saturate(100%) invert(50%) sepia(0%) saturate(0%)
+    hue-rotate(180deg) brightness(90%) contrast(90%);
+  opacity: 0.6;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.search-input-floating {
+  position: fixed;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  max-width: 400px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 10px 20px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  border: none;
+  outline: none;
+  font-size: 16px;
+  flex-grow: 1;
+  background: transparent;
+}
+
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+

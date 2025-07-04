@@ -1,0 +1,134 @@
+.custom-bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgb(241, 241, 241);
+  overflow-y: auto;
+  transition: height 0.1s ease-out;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  z-index: 1000;
+  will-change: height;
+  overflow-y: scroll;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  
+}
+
+.custom-bottom-sheet::-webkit-scrollbar {
+  display: none;
+}
+
+.drag-handle {
+  width: 40px;
+  height: 6px;
+  background-color: #ccc;
+  border-radius: 3px;
+  margin: 8px auto;
+  cursor: grab;
+}
+
+
+
+.border-pink {
+  border-color: #e91e63;
+  background-color: #e91e63;
+  color: white;
+}
+
+.border-orange {
+  border-color: orange;
+  background-color: orange;
+  color: white;
+}
+
+.border-green {
+  border-color: #78d5b3;
+  background-color: #78d5b3;
+  color: white;
+}
+
+
+.station-flex {
+  display: flex;                  /* วางแนวนอน */
+  align-items: center;           /* ชิดกลางแนวตั้ง */
+  gap: 12px;
+  background: white;
+  border-radius: 16px;
+  padding: 15px;
+  margin-top: 10px;
+  width: 90%;
+}
+
+/* กล่องห่อ arrow + destination */
+.station-arrow-destination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+
+.station-box {
+  min-width: 60px; /* อย่างน้อย 60px แต่จะขยายตามเนื้อหาได้ */
+  height: 30px;
+  padding: 0px 5px;
+  border-radius: 20px;
+  font-size: 12px;
+  border: 2px solid transparent;
+  font-weight: bold;
+  display: inline-block;
+  white-space: nowrap;   /* หรือ normal ตามต้องการ */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  
+}
+
+
+
+
+.station-arrow-destination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px; /* ให้ห่างจากปุ่ม EXPRESS เล็กน้อย */
+}
+
+.destination-info {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0;           /* ไม่มี margin บน */
+  line-height: 1.2;
+}
+
+.destination-info .font-gray {
+  margin-bottom: 4px;      /* ระยะห่างระหว่าง "ปลายทาง" กับชื่อสถานี */
+  font-size: 12px;
+  color: #888;
+}
+
+.destination-info div:last-child {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.font-gray {
+  font-size: 14px;
+  font-weight: 400;
+  color: #555;
+}
+
+
+.arrow-right {
+  width: 15px; /* ลดขนาดจาก 20px เป็น 12px */
+  height: 15px;
+  vertical-align: middle;
+  margin-left: 8px;
+
+  /* ทำให้เป็นสีเทา */
+  filter: brightness(0) saturate(100%) invert(50%) sepia(0%) saturate(0%)
+    hue-rotate(180deg) brightness(90%) contrast(90%);
+  opacity: 0.6;
+  transition: opacity 0.2s ease-in-out;
+}
+
