@@ -22,8 +22,8 @@
     "station": [
         {
             "id": 1,
-            "name": "อาคารผู้โดยสาร ชั้น 2 ประตู 5",
-            "transportation_id": 1,
+            "station_name": "อาคารผู้โดยสาร ชั้น 2 ประตู 5",
+            "transportation": "EXPRESS",
             "location": "13.7563° N, 100.5018° E",
             "stops": [
                 {
@@ -51,8 +51,8 @@
         
         {
             "id": 2,
-            "name": "อาคารสถานีดับเพลิงและกู้ภัย",
-            "transportation_id": 2,
+            "station_name": "อาคารสถานีดับเพลิงและกู้ภัย",
+            "transportation": "B LINE",
             "location": "13.7563° N, 100.5018° E",
             "stops":[
                 {
@@ -84,8 +84,8 @@
         },
         {
             "id": 3,
-            "name": "อาคารสถานีดับเพลิงและกู้ภัย",
-            "transportation_id": 3,
+            "station_name": "อาคารสถานีดับเพลิงและกู้ภัย",
+            "transportation": "F LINE",
             "location": "13.7563° N, 100.5018° E",
             "stops":[
                 {

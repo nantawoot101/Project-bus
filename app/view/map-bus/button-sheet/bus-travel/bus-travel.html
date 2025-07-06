@@ -1,29 +1,100 @@
 <div>
-    <link rel="stylesheet" href="app/view/map-bus/button-sheet/bus-travel/bus-travel.css" />
+  <link
+    rel="stylesheet"
+    href="app/view/map-bus/button-sheet/bus-travel/bus-travel.css"
+  />
 
-    <div>
-        <md-bottom-sheet class="custom-bottom-sheet" ng-style="{ height: sheetHeight + 'vh' }"
-            ng-class="{ expanded: isExpanded }">
-            <div class="drag-handle" ng-mousedown="startDrag($event)" ng-touchstart="startDrag($event)"></div>
-            <div>เส้นทางทั้งหมด</div>
+  <!-- Step 1 -->
+  <md-bottom-sheet
+    class="custom-bottom-sheet"
+    id="bottomSheet"
+    ng-if="currentStep === 1"
+    ng-class="{ expanded: isExpanded }"
+  >
+    <div
+      class="drag-handle"
+      ng-mousedown="startDrag($event)"
+      ng-touchstart="startDrag($event)"
+    ></div>
+    <div>เส้นทางทั้งหมด</div>
 
-            <md-list-item ng-repeat="station in station" ng-click="listItemClick($index)">
-                <div class="station-flex">
-                    <div class="station-box" ng-class="getBorderClass(station.transportation_id)">
-                        {{ getTransportationName(station.transportation_id) }}
-                    </div>
-
-                    <div class="station-arrow-destination">
-                        <img class="arrow-right" src="app/assets/icon/arrow-right.svg" />
-                        <div class="destination-info">
-                            <div class="font-gray">ปลายทาง</div>
-                            <div class="font-SL">{{ station.name }}</div>
-                        </div>
-                    </div>
-                </div>
-
-    </div>
+    <md-list-item
+      ng-repeat="station in station"
+      ng-click="goToStep(2, station)"
+    >
+      <div class="station-flex">
+        <div
+          class="station-box"
+          ng-class="getBorderClass(station.transportation)"
+        >
+          {{ station.transportation }}
+        </div>
+        <div class="station-arrow-destination">
+          <img class="arrow-right" src="app/assets/icon/arrow-right.svg" />
+          <div class="destination-info">
+            <div class="font-gray">ปลายทาง</div>
+            <div class="font-SL">{{ station.station_name }}</div>
+          </div>
+        </div>
+      </div>
     </md-list-item>
-    </md-bottom-sheet>
-</div>
+  </md-bottom-sheet>
+
+  <!-- Step 2 -->
+  <md-bottom-sheet
+    class="custom-bottom-sheet"
+    id="bottomSheet"
+    ng-if="currentStep === 2 && selectedStation"
+    ng-class="{ expanded: isExpanded }"
+  >
+    <div
+      class="drag-handle"
+      ng-mousedown="startDrag($event)"
+      ng-touchstart="startDrag($event)"
+    ></div>
+    <div class="vertical-connector-container" style="position: relative">
+      <!-- ✅ แก้ให้ใช้ selectedStation ตรง ๆ ได้เลย -->
+      <div class="mt-20">
+        <div
+          class="station-box station-display"
+          ng-class="getBorderClass(selectedStation.transportation)"
+        >
+          {{ selectedStation.transportation }}
+        </div>
+
+        <div
+          ng-repeat="stop in selectedStation.stops"
+          class="station-stop mt-20"
+          style="position: relative"
+        >
+          <!-- วงกลมตัวเลข -->
+          <div
+            class="number-circle"
+            ng-class="getBorderStation(selectedStation)"
+            style="z-index: 2; position: relative"
+          >
+            {{ $index + 1 }}
+
+            <!-- เส้นตรงกลางวงกลม (ถ้าไม่ใช่ตัวสุดท้าย) -->
+            <div
+              ng-if="!$last"
+              class="vertical-connector"
+              ng-class="{
+          'vertical-connector-pink': selectedStation.transportation === 'EXPRESS',
+          'vertical-connector-orange': selectedStation.transportation === 'B LINE',
+          'vertical-connector-green': selectedStation.transportation === 'F LINE'
+        }"
+            ></div>
+          </div>
+          <div
+            ng-if="!$last"
+            class="connector-line"
+            ng-class="getBorderStation(selectedTracking.station)"
+          ></div>
+          <!-- ชื่อสถานี -->
+          <div class="mt-1">{{ stop.name }}</div>
+        </div>
+      </div>
+    </div>
+  </md-bottom-sheet>
 </div>

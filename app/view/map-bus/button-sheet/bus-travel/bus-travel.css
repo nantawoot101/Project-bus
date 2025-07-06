@@ -5,10 +5,10 @@
   right: 0;
   background: rgb(241, 241, 241);
   overflow-y: auto;
-  transition: height 0.1s ease-out;
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
   z-index: 1000;
+  height: 20vh;
   will-change: height;
   overflow-y: scroll;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
@@ -70,7 +70,7 @@
 
 .station-box {
   min-width: 60px; /* อย่างน้อย 60px แต่จะขยายตามเนื้อหาได้ */
-  height: 30px;
+  height: 35px;
   padding: 0px 5px;
   border-radius: 20px;
   font-size: 12px;
@@ -130,5 +130,82 @@
     hue-rotate(180deg) brightness(90%) contrast(90%);
   opacity: 0.6;
   transition: opacity 0.2s ease-in-out;
+}
+
+
+/* Step === 2 */
+
+.number-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: white;
+  border: 2px solid #ccc;
+  text-align: center;
+  line-height: 28px;
+  font-weight: bold;
+  color: black;
+}
+
+
+.border-pink-2 {
+  border-color: #ff4da6 !important;
+}
+
+.border-orange-2 {
+  border-color: orange !important;
+}
+
+.border-green-2 {
+  border-color: #78d5b3 !important;
+}
+
+/* เส้นเชื่อมระหว่างหมายเลข */
+.connector-line {
+  width: 2px;
+  height: 40px; /* ปรับความยาวระยะห่างระหว่างจุด */
+  margin-top: -2px;
+}
+
+
+
+.vertical-connector {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 40px; /* ปรับความสูงให้ตรงกับระยะห่างแต่ละจุด */
+  border-radius: 2px;
+  z-index: 1;
+}
+
+.station-stop{
+  align-items: center;
+  display: flex;
+  gap: 4px;
+}
+
+
+.station-display{
+  align-items: center;
+  display: flex;
+  width: 60px;
+  justify-content: center;
+}
+
+
+.vertical-connector-pink {
+  background: #e91e63;
+}
+.vertical-connector-orange {
+  background: #ff9800;
+}
+.vertical-connector-green {
+  background: #00bfae;
+}
+
+.mt-20 {
+  margin-top: 20px;
 }
 
