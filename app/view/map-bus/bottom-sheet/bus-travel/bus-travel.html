@@ -12,23 +12,20 @@
     ng-style="{ overflowY: isExpanded ? 'auto' : 'hidden' }"
   >
     <div
-      class="drag-handle" 
-     ng-mousedown="startDrag($event)"
-     ontouchstart="startDrag(event)"
+      class="drag-handle"
+      ng-mousedown="startDrag($event)"
+      ontouchstart="startDrag(event)"
     ></div>
     <div class="font-SL m-l-12 m-t-10">เส้นทางทั้งหมด</div>
 
     <md-list-item
-      ng-repeat="station in transportation_lines"
-      ng-click="goToStep(2, station)"
+      ng-repeat="route in transportation_routes"
+      ng-click="goToStep(2, route)"
     >
       <div class="station-flex">
         <div class="station-box-container">
-          <div
-            class="station-box"
-            ng-class="getBorderClass(station.transportation)"
-          >
-            {{ station.transportation }}
+          <div class="station-box" ng-class="getBorderClass(route.route_name)">
+            {{ route.route_name }}
           </div>
           <img class="arrow-right" src="app/assets/icon/arrow-right.svg" />
         </div>
@@ -36,7 +33,9 @@
         <div class="station-arrow-destination">
           <div class="destination-info">
             <div class="font-gray">ปลายทาง</div>
-            <div class="font-SL">{{ station.station_name }}</div>
+            <div class="font-SL">
+              {{ getStationName(route.destination_station_id) }}
+            </div>
           </div>
         </div>
       </div>
@@ -46,7 +45,7 @@
   <md-bottom-sheet
     class="custom-bottom-sheet"
     id="bottomSheet"
-    ng-if="currentStep === 2 && selectedStation"
+    ng-if="currentStep === 2 "
     ng-class="{ expanded: isExpanded }"
     ng-style="{ overflowY: isExpanded ? 'auto' : 'hidden' }"
   >
@@ -64,25 +63,51 @@
       <div class="mt-20">
         <div
           class="station-box station-display"
-          ng-class="getBorderClass(selectedStation.transportation)"
+          ng-class="getBorderClass(selectedRoute.route_name)"
         >
           <img
-            ng-if="selectedStation.transportation === 'EXPRESS'"
+            ng-if="selectedRoute.route_name === 'EXPRESS'"
             src="app/assets/icon/bus-simple.svg"
             class="bus-img"
             alt="bus"
           />
-          {{ selectedStation.transportation }}
+          {{ selectedRoute.route_name }}
         </div>
 
         <div
-          ng-repeat="stop in selectedStation.stops"
+          ng-repeat="stop in selectedRoute.stops"
           class="station-stop mt-20"
           style="position: relative"
         >
+
+        <div class="column-left">
+          <div
+            class="bus-wrapper"
+            ng-class="getBusClass(selectedRoute.route_name)"
+            ng-if="stop.passing_bus_numbers.length"
+          >
+            <span
+              class="bus-number-in-rect"
+              ng-repeat="busNumber in stop.passing_bus_numbers"
+              ng-click="goToStep(3, route)"
+            >
+              {{ busNumber }}
+            </span>
+            <img
+              src="app/assets/icon/bus-simple.svg"
+              class="bus-img"
+              alt="bus"
+            />
+          </div>
+
+          </div>
+             
+          <div class="column-right">
+
+            <div class="station-number-column">
           <div
             class="number-circle"
-            ng-class="getBorderStation(selectedStation.transportation)"
+            ng-class="getBorderStation(selectedRoute.route_name)"
             style="z-index: 2; position: relative"
           >
             {{ $index + 1 }}
@@ -91,16 +116,107 @@
               ng-if="!$last"
               class="vertical-connector"
               ng-class="{
-          'vertical-connector-pink': selectedStation.transportation === 'EXPRESS',
-          'vertical-connector-orange': selectedStation.transportation === 'B LINE',
-          'vertical-connector-green': selectedStation.transportation === 'F LINE'
+          'vertical-connector-pink': selectedRoute.route_name === 'EXPRESS',
+          'vertical-connector-orange': selectedRoute.route_name === 'B LINE',
+          'vertical-connector-green': selectedRoute.route_name === 'F LINE'
         }"
             ></div>
           </div>
+          </div>
 
-          <div class="mt-1">{{ stop.name }}</div>
+          <div class="mt-1 station-name-aligned">
+            {{ getStationName(stop.station_id) }}
+          </div>
         </div>
+      </div>
       </div>
     </div>
   </md-bottom-sheet>
+
+ 
+
+
+  <md-bottom-sheet
+    class="custom-bottom-sheet"
+    id="bottomSheet"
+    ng-if="currentStep === 3 "
+    ng-class="{ expanded: isExpanded }"
+    ng-style="{ overflowY: isExpanded ? 'auto' : 'hidden' }"
+  >
+    <div
+      class="drag-handle"
+      ng-mousedown="startDrag($event)"
+      ontouchstart="startDrag(event)"
+    ></div>
+
+    <button class="close-btn-tab" ng-click="goBackToStep1()" aria-label="ปิด">
+      &times;
+    </button>
+
+    <div class="vertical-connector-container" style="position: relative">
+      <div class="mt-20">
+        <div
+          class="font-xl mt-2"
+        >
+            เส้นทางการเดินรถ
+        </div>
+
+        <div
+          ng-repeat="stop in selectedRoute.stops"
+          class="station-stop mt-20"
+          style="position: relative"
+        >
+
+        <div class="column-left">
+          <div
+            class="bus-wrapper"
+            ng-class="getBusClass(selectedRoute.route_name)"
+            ng-if="stop.passing_bus_numbers.length"
+          >
+            <span
+              class="bus-number-in-rect"
+              ng-repeat="busNumber in stop.passing_bus_numbers"
+            >
+              {{ busNumber }}
+            </span>
+            <img
+              src="app/assets/icon/bus-simple.svg"
+              class="bus-img"
+              alt="bus"
+            />
+          </div>
+
+          </div>
+             
+          <div class="column-right">
+
+            <div class="station-number-column">
+          <div
+            class="number-circle"
+            ng-class="getBorderStation(selectedRoute.route_name)"
+            style="z-index: 2; position: relative"
+          >
+            {{ $index + 1 }}
+
+            <div
+              ng-if="!$last"
+              class="vertical-connector"
+              ng-class="{
+          'vertical-connector-pink': selectedRoute.route_name === 'EXPRESS',
+          'vertical-connector-orange': selectedRoute.route_name === 'B LINE',
+          'vertical-connector-green': selectedRoute.route_name === 'F LINE'
+        }"
+            ></div>
+          </div>
+          </div>
+
+          <div class="mt-1 station-name-aligned">
+            {{ getStationName(stop.station_id) }}
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </md-bottom-sheet>
+
 </div>

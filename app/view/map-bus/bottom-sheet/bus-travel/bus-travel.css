@@ -80,7 +80,7 @@
 .station-arrow-destination {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
 }
 
 .station-box {
@@ -137,6 +137,8 @@
   transition: opacity 0.2s ease-in-out;
 }
 
+
+
 /* Step === 2 */
 
 .number-circle {
@@ -152,7 +154,12 @@
   line-height: 28px;
   font-weight: bold;
   color: black;
+  text-align: center;
+  font-weight: bold;
+  position: relative;
 }
+
+
 
 .border-pink-2 {
   border-color: #e91e63 !important;
@@ -181,8 +188,9 @@
   left: 50%;
   top: 100%;
   transform: translateX(-50%);
-  width: 4px;
-  height: 40px; /* ปรับความสูงให้ตรงกับระยะห่างแต่ละจุด */
+  width: 5px;
+  min-height: 50px;
+  max-height: 500px;
   border-radius: 2px;
   z-index: 1;
 }
@@ -191,10 +199,11 @@
   align-items: center;
   display: flex;
   gap: 8px;
+  
 }
 
 .station-stop div:last-child {
-  max-width: 250px; /* หรือ % ตามที่เหมาะ */
+  max-width: 250px; 
   word-wrap: break-word;
 }
 .station-display {
@@ -241,6 +250,7 @@
   transition: background 0.2s, color 0.2s;
 }
 
+
 .bus-img{
   width: 16px;
   height: 16px;
@@ -249,3 +259,81 @@
   filter: brightness(0) invert(1); /* เปลี่ยนเป็นสีขาว */
 }
 
+
+
+.bus-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 3px;
+  border-radius: 20px;
+}
+
+.bus-wrapper-pink {
+  background-color: #e91e63;
+  color: #e91e63;
+}
+
+.bus-wrapper-orange {
+  background-color: orange;
+  color: orange;
+}
+
+.bus-wrapper-green {
+  background-color: #00bfae;
+  color: #00bfae;
+}
+
+.bus-number-in-rect {
+  font-size: 12px;
+  font-weight: bold;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+  text-align: center;
+  background: white;
+  color: inherit;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 1px; /* เพิ่มช่องไฟระหว่างหมายเลข */
+}
+
+.column-left {
+    flex-shrink: 0; 
+    width: 60px; 
+    display: flex; 
+    align-items: center; 
+    height: 100%; 
+    justify-content: right;
+}
+
+.column-right {
+    display: flex;
+    align-items: center;
+    flex-grow: 1; /* ให้ขยายเต็มพื้นที่ที่เหลือ */
+    gap: 8px; 
+}
+
+.station-number-column {
+  width: 30px;        /* ✅ fix ความกว้าง */
+  flex-shrink: 0;     /* ✅ ห้ามบีบ */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.station-name-aligned {
+  flex: 1;               /* ✅ ให้ใช้พื้นที่ที่เหลือ */
+  word-wrap: break-word;
+  line-height: 1.4;
+  max-width: 220px;      /* ✅ จำกัดความกว้างของชื่อสถานี */
+}
+
+
+
+/* Step === 3 */
+.font-xl{
+  font-size: 18px;
+  font-weight: bold;
+}

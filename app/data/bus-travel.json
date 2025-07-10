@@ -1,131 +1,143 @@
 {
   "stations": [
-    { "station_id": "S1", "name": "ศูนย์ขนส่งสาธารณะ" },
-    { "station_id": "S2", "name": "อาคารผู้โดยสาร ชั้น 4 ประตู 5" },
-    { "station_id": "S3", "name": "อาคารผู้โดยสาร ชั้น 2 ประตู 5" },
-    { "station_id": "S4", "name": "สิ้นสุดสถานีที่ศูนย์การขนส่งสาธารณะ" },
-    { "station_id": "S5", "name": "อาคารพักเวร ฝ่ายรักษาความปลอดภัย" },
+    {
+      "station_id": "S1",
+      "name": "ศูนย์ขนส่งสาธารณะ",
+      "latitude": 13.6899,
+      "longitude": 100.7501
+    },
+    {
+      "station_id": "S2",
+      "name": "อาคารผู้โดยสาร ชั้น 4 ประตู 5",
+      "latitude": 13.7,
+      "longitude": 100.749
+    },
+    {
+      "station_id": "S3",
+      "name": "อาคารผู้โดยสาร ชั้น 2 ประตู 5",
+      "latitude": 13.7005,
+      "longitude": 100.7485
+    },
+    {
+      "station_id": "S4",
+      "name": "สิ้นสุดสถานีที่ศูนย์การขนส่งสาธารณะ",
+      "latitude": 13.6899,
+      "longitude": 100.7501
+    },
+    {
+      "station_id": "S5",
+      "name": "อาคารพักเวร ฝ่ายรักษาความปลอดภัย",
+      "latitude": 13.696,
+      "longitude": 100.754
+    },
     {
       "station_id": "S6",
-      "name": "ครัวการบินกรุงเทพ บริษัท ครัวการบินกรุงเทพ จำกัด"
+      "name": "ครัวการบินกรุงเทพ บริษัท ครัวการบินกรุงเทพ จำกัด",
+      "latitude": 13.697,
+      "longitude": 100.753
     },
-    { "station_id": "S7", "name": "ตรงข้ามสถานีดับเพลิงและกู้ภัย" },
+    {
+      "station_id": "S7",
+      "name": "ตรงข้ามสถานีดับเพลิงและกู้ภัย",
+      "latitude": 13.6955,
+      "longitude": 100.7555
+    },
     {
       "station_id": "S8",
-      "name": "สะพานลอยหน้าฝ่ายบริการภาคพื้น บริษัท การบินไทย จำกัด (มหาชน)"
+      "name": "สะพานลอยหน้าฝ่ายบริการภาคพื้น บริษัท การบินไทย จำกัด (มหาชน)",
+      "latitude": 13.698,
+      "longitude": 100.752
     }
   ],
 
-  "lines": [
-    { "line_id": "EXP", "name": "EXPRESS", "station_ids": ["S1", "S2", "S3"] },
+  "bus_lines_metadata": [
+    { "bus_id": "bus_001", "bus_number": "41", "description": "รถเมล์สาย 41" },
+    { "bus_id": "bus_002", "bus_number": "42", "description": "รถเมล์สาย 42" },
+    { "bus_id": "bus_003", "bus_number": "65", "description": "รถเมล์สาย 65" },
     {
-      "line_id": "B",
-      "name": "B LINE",
-      "station_ids": ["S1", "S5", "S6", "S7", "S8"]
+      "bus_id": "bus_b01",
+      "bus_number": "B",
+      "description": "Shuttle Bus สาย B"
     },
     {
-      "line_id": "F",
-      "name": "F LINE",
-      "station_ids": ["S1", "S5", "S6", "S7", "S8"]
+      "bus_id": "bus_f01",
+      "bus_number": "F",
+      "description": "Shuttle Bus สาย F"
     }
   ],
 
-  "bus": [
+  "transportation_routes": [
     {
-      "bus_id": "BUS-43",
-      "bus_number": "43",
-      "line_id": "EXP",
-      "route_name": "ไปอาคารผู้โดยสาร",
-      "station_ids": ["S1", "S2", "S3", "S4"]
+      "route_id": "EXPRESS",
+      "route_name": "EXPRESS",
+      "type": "Airport Shuttle",
+      "description": "เส้นทางด่วนไปยังอาคารผู้โดยสาร",
+      "destination_station_id": "S3",
+      "stops": [
+        { "station_id": "S1", "stop_order": 1, "passing_bus_numbers": ["43"] },
+        {
+          "station_id": "S2",
+          "stop_order": 2,
+          "passing_bus_numbers": ["42", "65"]
+        },
+        { "station_id": "S3", "stop_order": 3, "passing_bus_numbers": [] },
+        { "station_id": "S4", "stop_order": 4, "passing_bus_numbers": ["41"] }
+      ]
+    },
+    {
+      "route_id": "B_LINE",
+      "route_name": "B LINE",
+      "type": "Airport Shuttle",
+      "description": "เส้นทาง B LINE",
+      "destination_station_id": "S7",
+      "stops": [
+        { "station_id": "S1", "stop_order": 1, "passing_bus_numbers": ["43"] },
+        { "station_id": "S5", "stop_order": 2, "passing_bus_numbers": ["42", "65"] },
+        { "station_id": "S6", "stop_order": 3, "passing_bus_numbers": [] },
+        { "station_id": "S7", "stop_order": 4, "passing_bus_numbers": ["41"] },
+        { "station_id": "S8", "stop_order": 5, "passing_bus_numbers": [] }
+      ]
+    },
+    {
+      "route_id": "F_LINE",
+      "route_name": "F LINE",
+      "type": "Airport Shuttle",
+      "description": "เส้นทาง F LINE",
+      "destination_station_id": "S7",
+      "stops": [
+        { "station_id": "S1", "stop_order": 1, "passing_bus_numbers": ["43"] },
+        { "station_id": "S5", "stop_order": 2, "passing_bus_numbers": ["42", "65"] },
+        { "station_id": "S6", "stop_order": 3, "passing_bus_numbers": [] },
+        { "station_id": "S7", "stop_order": 4, "passing_bus_numbers": ["41"] },
+        { "station_id": "S8", "stop_order": 5, "passing_bus_numbers": [] }
+      ]
     }
   ],
 
-
-
-
-  
-
-  "transportation_lines": [
+  "bus_realtime_status": [
     {
-      "id": 1,
-      "station_name": "อาคารผู้โดยสาร ชั้น 2 ประตู 5",
-      "transportation": "EXPRESS",
-      "location": "13.7563° N, 100.5018° E",
-      "stops": [
-        {
-          "id": 1,
-          "name": "ศูนย์ขนส่งสาธารณะ"
-        },
-        {
-          "id": 2,
-          "name": "อาคารผู้โดยสาร ชั้น 4 ประตู 5"
-        },
-        {
-          "id": 3,
-          "name": "อาคารผู้โดยสาร ชั้น 2 ประตู 5"
-        },
-        {
-          "id": 4,
-          "name": "สิ้นสุดสถานีที่ศูนย์ขนส่งสาธารณะ"
-        }
-      ]
-    },
-
-    {
-      "id": 2,
-      "station_name": "อาคารสถานีดับเพลิงและกู้ภัย",
-      "transportation": "B LINE",
-      "location": "13.7563° N, 100.5018° E",
-      "stops": [
-        {
-          "id": 1,
-          "name": "ศูนย์การขนส่งสาธารณะ"
-        },
-        {
-          "id": 2,
-          "name": "อาคารพักเวร ฝ่ายรักษาความปลอดภัย"
-        },
-        {
-          "id": 3,
-          "name": "ครัวการบินกรุงเทพ บริษัท ครัวการบินกรุงเทพ จำกัด"
-        },
-        {
-          "id": 4,
-          "name": "ตรงข้ามสถานีดับเพลิงและกู้ภัย"
-        },
-        {
-          "id": 5,
-          "name": "สะพานลอยหน้าฝ่ายบริการภาคพื้น บริษัท การบินไทย จำกัด (มหาชน)"
-        }
-      ]
+      "bus_number": "63",
+      "bus_id": "bus_b01",
+      "plate": "34-2307",
+      "line": "B",
+      "next_station_id": "S2",
+      "arrival_time": "17:15"
     },
     {
-      "id": 3,
-      "station_name": "อาคารสถานีดับเพลิงและกู้ภัย",
-      "transportation": "F LINE",
-      "location": "13.7563° N, 100.5018° E",
-      "stops": [
-        {
-          "id": 1,
-          "name": "ศูนย์การขนส่งสาธารณะ"
-        },
-        {
-          "id": 2,
-          "name": "อาคารพักเวร ฝ่ายรักษาความปลอดภัย"
-        },
-        {
-          "id": 3,
-          "name": "ครัวการบินกรุงเทพ บริษัท ครัวการบินกรุงเทพ จำกัด"
-        },
-        {
-          "id": 4,
-          "name": "ตรงข้ามสถานีดับเพลิงและกู้ภัย"
-        },
-        {
-          "id": 5,
-          "name": "สะพานลอยหน้าฝ่ายบริการภาคพื้น บริษัท การบินไทย จำกัด (มหาชน)"
-        }
-      ]
+      "bus_number": "66",
+      "bus_id": "bus_001",
+      "plate": "34-2316",
+      "line": "EXPRESS",
+      "next_station_id": "S3",
+      "arrival_time": "17:30"
+    },
+    {
+      "bus_number": "40",
+      "bus_id": "bus_f01",
+      "plate": "31-7467",
+      "line": "F",
+      "next_station_id": "S1",
+      "arrival_time": "18:01"
     }
   ]
 }

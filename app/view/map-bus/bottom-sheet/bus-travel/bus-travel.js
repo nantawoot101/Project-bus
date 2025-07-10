@@ -3,20 +3,36 @@ angular
   .controller(
     "BusController",
     function ($scope, $http, $document, $rootScope, $mdBottomSheet) {
-      $scope.transportation_lines = [];
+      $scope.transportation_routes = []; // เปลี่ยนชื่อให้ตรงกับโครงสร้าง
 
       $http
         .get("app/data/bus-travel.json")
         .then(function (response) {
-          $scope.transportation_lines = response.data.transportation_lines;
+          $scope.transportation_routes = response.data.transportation_routes;
+          $scope.stations = response.data.stations;
+          $scope.bus_lines_metadata = response.data.bus_lines_metadata;
         })
         .catch(function (error) {
           console.error("เกิดข้อผิดพลาดในการโหลด JSON", error);
         });
 
+      $scope.getStationName = function (station_id) {
+        const station = ($scope.stations || []).find(
+          (s) => s.station_id === station_id
+        );
+        return station ? station.name : "ไม่พบสถานี";
+      };
+
+      $scope.getBusNumber = function (bus_id) {
+        const bus = ($scope.bus_lines_metadata || []).find(
+          (b) => b.bus_id === bus_id
+        );
+        return bus ? bus.bus_number : "ไม่ทราบหมายเลขรถ";
+      };
+
       // คืน class สีของ border ตามประเภทการเดินทาง
-      $scope.getBorderClass = function (transportation) {
-        const name = (transportation || "").trim().toUpperCase();
+      $scope.getBorderClass = function (route_name) {
+        const name = (route_name || "").trim().toUpperCase();
 
         if (name === "EXPRESS") return "border-pink";
         if (name === "B LINE") return "border-orange";
@@ -115,29 +131,39 @@ angular
       //ส่วนแบ่ง Step
       $scope.currentStep = 1;
 
-      $scope.selectedStation = null;
+      $scope.selectedRoute = null;
 
-      $scope.goToStep = function (step, transportation_lines) {
+      $scope.goToStep = function (step, route) {
         $scope.currentStep = step;
         // ถ้าเข้าสต็ป 2 ให้เก็บ station ที่เลือกไว้
-        if (step === 2 && transportation_lines) {
-          $scope.selectedStation = transportation_lines;
+        if (step === 2 && route) {
+          $scope.selectedRoute = route;
         }
       };
 
       $scope.goBackToStep1 = function () {
         $scope.currentStep = 1;
-        $scope.selectedStation = null; // reset ค่า
+        $scope.selectedRoute = null; // reset ค่า
       };
 
       // ส่วนจัดการ Step 2
 
-      $scope.getBorderStation = function (transportation) {
-        const name = (transportation || "").trim().toUpperCase();
+      $scope.getBorderStation = function (route_name) {
+        const name = (route_name || "").trim().toUpperCase();
 
         if (name === "EXPRESS") return "border-pink-2";
         if (name === "B LINE") return "border-orange-2";
         if (name === "F LINE") return "border-green-2";
+
+        return "";
+      };
+
+      $scope.getBusClass = function (route_name) {
+        const name = (route_name || "").trim().toUpperCase();
+
+        if (name === "EXPRESS") return "bus-wrapper-pink";
+        if (name === "B LINE") return "bus-wrapper-orange";
+        if (name === "F LINE") return "bus-wrapper-green";
 
         return "";
       };
