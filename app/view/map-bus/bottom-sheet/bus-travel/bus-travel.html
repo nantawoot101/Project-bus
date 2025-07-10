@@ -1,36 +1,39 @@
 <div>
   <link
     rel="stylesheet"
-    href="app/view/map-bus/button-sheet/bus-travel/bus-travel.css"
+    href="app/view/map-bus/bottom-sheet/bus-travel/bus-travel.css"
   />
 
-  <!-- Step 1 -->
   <md-bottom-sheet
     class="custom-bottom-sheet"
     id="bottomSheet"
     ng-if="currentStep === 1"
     ng-class="{ expanded: isExpanded }"
+    ng-style="{ overflowY: isExpanded ? 'auto' : 'hidden' }"
   >
     <div
-      class="drag-handle"
-      ng-mousedown="startDrag($event)"
-      ng-touchstart="startDrag($event)"
+      class="drag-handle" 
+     ng-mousedown="startDrag($event)"
+     ontouchstart="startDrag(event)"
     ></div>
-    <div>เส้นทางทั้งหมด</div>
+    <div class="font-SL m-l-12 m-t-10">เส้นทางทั้งหมด</div>
 
     <md-list-item
-      ng-repeat="station in station"
+      ng-repeat="station in transportation_lines"
       ng-click="goToStep(2, station)"
     >
       <div class="station-flex">
-        <div
-          class="station-box"
-          ng-class="getBorderClass(station.transportation)"
-        >
-          {{ station.transportation }}
-        </div>
-        <div class="station-arrow-destination">
+        <div class="station-box-container">
+          <div
+            class="station-box"
+            ng-class="getBorderClass(station.transportation)"
+          >
+            {{ station.transportation }}
+          </div>
           <img class="arrow-right" src="app/assets/icon/arrow-right.svg" />
+        </div>
+
+        <div class="station-arrow-destination">
           <div class="destination-info">
             <div class="font-gray">ปลายทาง</div>
             <div class="font-SL">{{ station.station_name }}</div>
@@ -40,25 +43,35 @@
     </md-list-item>
   </md-bottom-sheet>
 
-  <!-- Step 2 -->
   <md-bottom-sheet
     class="custom-bottom-sheet"
     id="bottomSheet"
     ng-if="currentStep === 2 && selectedStation"
     ng-class="{ expanded: isExpanded }"
+    ng-style="{ overflowY: isExpanded ? 'auto' : 'hidden' }"
   >
     <div
       class="drag-handle"
       ng-mousedown="startDrag($event)"
-      ng-touchstart="startDrag($event)"
+      ontouchstart="startDrag(event)"
     ></div>
+
+    <button class="close-btn-tab" ng-click="goBackToStep1()" aria-label="ปิด">
+      &times;
+    </button>
+
     <div class="vertical-connector-container" style="position: relative">
-      <!-- ✅ แก้ให้ใช้ selectedStation ตรง ๆ ได้เลย -->
       <div class="mt-20">
         <div
           class="station-box station-display"
           ng-class="getBorderClass(selectedStation.transportation)"
         >
+          <img
+            ng-if="selectedStation.transportation === 'EXPRESS'"
+            src="app/assets/icon/bus-simple.svg"
+            class="bus-img"
+            alt="bus"
+          />
           {{ selectedStation.transportation }}
         </div>
 
@@ -67,15 +80,13 @@
           class="station-stop mt-20"
           style="position: relative"
         >
-          <!-- วงกลมตัวเลข -->
           <div
             class="number-circle"
-            ng-class="getBorderStation(selectedStation)"
+            ng-class="getBorderStation(selectedStation.transportation)"
             style="z-index: 2; position: relative"
           >
             {{ $index + 1 }}
 
-            <!-- เส้นตรงกลางวงกลม (ถ้าไม่ใช่ตัวสุดท้าย) -->
             <div
               ng-if="!$last"
               class="vertical-connector"
@@ -86,12 +97,7 @@
         }"
             ></div>
           </div>
-          <div
-            ng-if="!$last"
-            class="connector-line"
-            ng-class="getBorderStation(selectedTracking.station)"
-          ></div>
-          <!-- ชื่อสถานี -->
+
           <div class="mt-1">{{ stop.name }}</div>
         </div>
       </div>

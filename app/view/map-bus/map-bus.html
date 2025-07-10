@@ -1,22 +1,16 @@
 <div ng-controller="MapBusController">
   <link rel="stylesheet" href="app/view/map-bus/map-bus.css" />
 
-  <!-- Wrapper ที่ครอบทั้งแผนที่และแผงควบคุม -->
   <div class="map-wrapper">
     <div id="map"></div>
-
-
-          <div
-        class="search-box"
-        ng-show="!isSearching"
-         ng-cloak ng-click="isSearching = true"
-      >
-        <img
-          src="app/assets/icon/search.svg"
-          alt="search"
-          class="search-icon"
-        />
-      </div>
+    <button
+      class="search-box"
+      ng-show="!isSearching"
+      ng-cloak
+      ng-click="isSearching = true"
+    >
+      <img src="app/assets/icon/search.svg" alt="search" class="search-icon" />
+    </button>
 
     <div class="search-input-floating" ng-show="isSearching">
       <img src="app/assets/icon/search.svg" alt="search" class="search-icon" />
@@ -30,10 +24,15 @@
       <button class="close-btn" ng-click="isSearching = false">×</button>
     </div>
 
-    <!-- ส่วนนี้จะลอยทับแผนที่ -->
-    <div ng-controller="BusController" class="map-overlay">
+
+
+    <button class="coser_blue" id="gpsButton" ng-click="Current_Position()">
+      <img class="coser_blue-icon" src="app/assets/icon/gps-navigation.png" alt="">
+    </button>
+
+    <div ng-controller="BusController" class="">
       <div
-        ng-include="'app/view/map-bus/button-sheet/bus-travel/bus-travel.html'"
+        ng-include="'app/view/map-bus/bottom-sheet/bus-travel/bus-travel.html'"
       ></div>
     </div>
   </div>
