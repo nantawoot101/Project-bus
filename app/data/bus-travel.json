@@ -105,10 +105,10 @@
       "description": "เส้นทาง F LINE",
       "destination_station_id": "S7",
       "stops": [
-        { "station_id": "S1", "stop_order": 1, "passing_bus_numbers": ["43"] },
-        { "station_id": "S5", "stop_order": 2, "passing_bus_numbers": ["42", "65"] },
-        { "station_id": "S6", "stop_order": 3, "passing_bus_numbers": [] },
-        { "station_id": "S7", "stop_order": 4, "passing_bus_numbers": ["41"] },
+        { "station_id": "S1", "stop_order": 1, "passing_bus_numbers": [] },
+        { "station_id": "S5", "stop_order": 2, "passing_bus_numbers": ["39"] },
+        { "station_id": "S6", "stop_order": 3, "passing_bus_numbers": ["40"] },
+        { "station_id": "S7", "stop_order": 4, "passing_bus_numbers": [] },
         { "station_id": "S8", "stop_order": 5, "passing_bus_numbers": [] }
       ]
     }

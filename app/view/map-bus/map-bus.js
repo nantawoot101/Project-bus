@@ -106,4 +106,10 @@ app.controller("MapBusController", function ($scope, $timeout, $rootScope) {
       return item.name.toLowerCase().includes(query);
     });
   };
+
+
+
+
+
+
 });

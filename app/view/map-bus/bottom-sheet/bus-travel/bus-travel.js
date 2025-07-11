@@ -133,17 +133,26 @@ angular
 
       $scope.selectedRoute = null;
 
-      $scope.goToStep = function (step, route) {
+      $scope.goToStep = function (step, route, bus) {
         $scope.currentStep = step;
         // ถ้าเข้าสต็ป 2 ให้เก็บ station ที่เลือกไว้
         if (step === 2 && route) {
           $scope.selectedRoute = route;
+        }
+
+        if (step === 3) {
+          $scope.selectedBusNumber = bus; // เก็บเบอร์รถที่เลือก
         }
       };
 
       $scope.goBackToStep1 = function () {
         $scope.currentStep = 1;
         $scope.selectedRoute = null; // reset ค่า
+      };
+
+      $scope.goBackToStep2 = function () {
+        $scope.currentStep = 2;
+        $scope.selectedBusNumber = null; // reset ค่า
       };
 
       // ส่วนจัดการ Step 2
@@ -158,12 +167,82 @@ angular
         return "";
       };
 
+
+            $scope.getVerticalClass = function (route_name) {
+
+        // ถ้าไม่ผ่านทั้งคู่ ให้ใช้สีตามเส้นทาง
+        const name = (route_name || "").trim().toUpperCase();
+        if (name === "EXPRESS") return "vertical-connector-pink";
+        if (name === "B LINE") return "vertical-connector-orange";
+        if (name === "F LINE") return "vertical-connector-green";
+
+        return "";
+      };
+
       $scope.getBusClass = function (route_name) {
         const name = (route_name || "").trim().toUpperCase();
 
         if (name === "EXPRESS") return "bus-wrapper-pink";
         if (name === "B LINE") return "bus-wrapper-orange";
         if (name === "F LINE") return "bus-wrapper-green";
+
+        return "";
+      };
+
+      // ส่วนจัดการ Step 3
+      $scope.getLastBusStopOrder = function (route) {
+        let lastOrder = 0;
+        route.stops.forEach((stop) => {
+          if (
+            stop.passing_bus_numbers &&
+            stop.passing_bus_numbers.includes($scope.selectedBusNumber)
+          ) {
+            if (stop.stop_order > lastOrder) {
+              lastOrder = stop.stop_order;
+            }
+          }
+        });
+        return lastOrder;
+      };
+
+      $scope.isPassedStation = function (stop, route) {
+        const lastOrder = $scope.getLastBusStopOrder(route);
+        return stop.stop_order <= lastOrder;
+      };
+
+      $scope.getBorderStep3_Station = function (route, stop) {
+        if ($scope.isPassedStation(stop, route)) {
+          return "border-gray-2"; // ผ่านแล้ว
+        }
+
+        const name = (route.route_name || "").trim().toUpperCase();
+
+        if (name === "EXPRESS") return "border-pink-2";
+        if (name === "B LINE") return "border-orange-2";
+        if (name === "F LINE") return "border-green-2";
+
+        return "";
+      };
+
+      $scope.getConnectorClass = function (route, stopIndex) {
+        const stops = route.stops;
+
+        const currentStop = stops[stopIndex];
+        const nextStop = stops[stopIndex + 1];
+
+        // ตรวจสอบว่าทั้งสถานีนี้และสถานีถัดไป "ผ่านแล้ว"
+        const passedCurrent = $scope.isPassedStation(currentStop, route);
+        const passedNext = $scope.isPassedStation(nextStop, route);
+
+        if (passedCurrent && passedNext) {
+          return "vertical-connector-gray";
+        }
+
+        // ถ้าไม่ผ่านทั้งคู่ ให้ใช้สีตามเส้นทาง
+        const name = (route.route_name || "").trim().toUpperCase();
+        if (name === "EXPRESS") return "vertical-connector-pink";
+        if (name === "B LINE") return "vertical-connector-orange";
+        if (name === "F LINE") return "vertical-connector-green";
 
         return "";
       };
