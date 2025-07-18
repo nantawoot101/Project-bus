@@ -62,38 +62,6 @@
   transition: opacity 0.2s ease-in-out;
 }
 
-.search-input-floating {
-  position: fixed;
-  top: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%;
-  max-width: 400px;
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  padding: 10px 20px;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-}
-
-.search-input {
-  border: none;
-  outline: none;
-  font-size: 16px;
-  flex-grow: 1;
-  background: transparent;
-}
-
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 20px;
-  margin-left: 10px;
-  cursor: pointer;
-}
 
 .coser_blue {
   position: absolute;
@@ -123,5 +91,116 @@
   right: 16px;
   transition: bottom 0.3s ease;
   z-index: 9999; /* อยู่บนสุด */
+}
+
+
+.location-barkground {
+  position: absolute;
+  width: 100%;
+  top: 0px;
+  z-index: 1000;
+  background-color: white;
+  padding: 10px 10px 20px 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.location-header {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start; /* ให้ช่อง input เริ่มจากบน */
+  padding: 10px;
+  background-color: white;
+  position: relative;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 5px;
+
+}
+
+.location-input-wrapper {
+  flex: 1;  /* ให้ใช้พื้นที่ที่เหลือทั้งหมด */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+
+.chevron-left-icon {
+  width: 24px;
+  height: 24px;
+}
+
+
+.location-box {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  height: 40px;
+  padding: 0 10px;
+  
+  gap: 10px;
+}
+
+.location-icon {
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.location-box input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  background: transparent;
+  color: #333;
+  padding: 0;
+  margin: 0;
+}
+
+.location-box-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px; /* ระยะห่างระหว่างกล่องกับปุ่ม */
+}
+
+.arrow-up-down {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow-up-down-icon {
+  width: 20px;
+  height: 20px;
+}
+
+
+
+.station-marker {
+  background-color: #8e44ad; /* สีม่วง */
+  width: 20px;
+  height: 20px;
+  display: block;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 0 4px rgba(0,0,0,0.3);
 }
 

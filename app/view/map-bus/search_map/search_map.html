@@ -1,0 +1,48 @@
+<link rel="stylesheet" href="app/view/map-bus/search_map/search_map.css" />
+
+<div class="body" ng-controller="SearchMapController">
+  <div class="search-row">
+    <button class="back-btn" ng-click="goBack()">
+      <img
+        src="app/assets/icon/chevron-left.svg"
+        alt="back"
+        class="chevron-left-icon"
+      />
+    </button>
+
+    <div class="search-input-floating">
+      <img src="app/assets/icon/search.svg" alt="search" class="search-icon" />
+      <input
+        type="text"
+        class="ms-1 search-input"
+        placeholder="คุณจะไปที่ไหน"
+        ng-model="searchQuery"
+        ng-change="filterStations()"
+        autofocus
+      />
+      <button class="close-btn" ng-click="clearSearch()">×</button>
+    </div>
+  </div>
+
+  <div class="result-list" ng-if="filteredStations.length > 0">
+    <div
+      class="result-item"
+      ng-repeat="station in filteredStations"
+      ng-click="selectStation(station)"
+    >
+      <div class="result-item-inner">
+        <div class="search-icon-radius">
+          <img
+            src="app/assets/icon/search.svg"
+            alt="search"
+            class="search-icon-mini"
+          />
+        </div>
+        <span class="station-name">{{ station.name }}</span>
+        <div class="arrow-up-left">
+          <img src="app/assets/icon/arrow-up-left.svg" alt="" />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

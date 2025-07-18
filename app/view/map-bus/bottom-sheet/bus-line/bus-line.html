@@ -1,0 +1,46 @@
+<link
+  rel="stylesheet"
+  href="app/view/map-bus/bottom-sheet/bus-line/bus-line.css"
+/>
+<div  >
+  <md-bottom-sheet
+    class="bus-line-sheet"
+    id="buslineSheet"
+    ng-class="{ expanded: isExpanded }"
+    ng-style="{ overflowY: isExpanded ? 'auto' : 'hidden' }"
+    
+  >
+    <div
+      class="drag-handle-two"
+      ng-mousedown="buslineStartDrag($event)"
+      ontouchstart="buslineStartDrag(event)"
+    ></div>
+    <div class="font-SL m-l-12 m-t-10">รถที่ผ่าน</div>
+
+    <md-list-item ng-repeat="route in bus_arrivals">
+      <div class="bus-flex">
+        <div class="bus-box-container">
+          <div class="bus-station-box" ng-class="getBusVerticalClass(route.route_id)">
+            <div class="font-SXL">{{ route.bus_number }}</div>
+            <div class="font-SS" style="margin-top: 2px">{{ route.route_id }}</div>
+          </div>
+          <!-- <img class="arrow-right" src="app/assets/icon/arrow-right.svg" /> -->
+        </div>
+
+        <div class="bus-arrow-destination">
+          <div class="bus-destination-info">
+            <div class="">
+              <div class="box-bus"><img src="app/assets/icon/bus-simple.svg" alt="bus-simple" width="14px" height="14px">{{route.license_plate}}</div>
+              
+              <div class="m-t-10">
+                <img src="app/assets/icon/reply_all_right.svg" alt="" width="20px" height="20px">
+                {{ getStationNameById(route.current_station_id) }}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="arrival_time"> {{route.arrival_time | addTimeSuffix}} </div>
+      </div>
+    </md-list-item>
+  </md-bottom-sheet>
+</div>

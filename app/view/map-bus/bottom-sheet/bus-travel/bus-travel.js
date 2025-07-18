@@ -116,15 +116,26 @@ angular
 
       window.startDrag = $scope.startDrag;
 
-      updateGpsButtonPosition(20);
+      updateGpsButtonPosition(30);
       function updateGpsButtonPosition(bottomSheetHeightVH) {
         const gpsButton = document.getElementById("gpsButton");
         if (!gpsButton) return;
 
         const vh = window.innerHeight / 100;
-        const offsetY = 4 * vh;
-        const bottomPx = bottomSheetHeightVH * vh + offsetY;
 
+        // เช็คว่าเป็นมือถือหรือแท็บเล็ต (iPad)
+        const screenWidth = window.innerWidth;
+        let offsetY;
+
+        if (screenWidth <= 767) {
+          // โทรศัพท์มือถือ
+          offsetY = -8 * vh;
+        } else {
+          // ไอแพดหรือหน้าจอใหญ่กว่า
+          offsetY = -4 * vh;
+        }
+
+        const bottomPx = bottomSheetHeightVH * vh + offsetY;
         gpsButton.style.bottom = bottomPx + "px";
       }
 
@@ -167,9 +178,7 @@ angular
         return "";
       };
 
-
-            $scope.getVerticalClass = function (route_name) {
-
+      $scope.getVerticalClass = function (route_name) {
         // ถ้าไม่ผ่านทั้งคู่ ให้ใช้สีตามเส้นทาง
         const name = (route_name || "").trim().toUpperCase();
         if (name === "EXPRESS") return "vertical-connector-pink";
@@ -246,5 +255,7 @@ angular
 
         return "";
       };
+
+      
     }
   );

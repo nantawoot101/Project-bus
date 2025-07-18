@@ -50,25 +50,9 @@
     }
   ],
 
-  "bus_lines_metadata": [
-    { "bus_id": "bus_001", "bus_number": "41", "description": "รถเมล์สาย 41" },
-    { "bus_id": "bus_002", "bus_number": "42", "description": "รถเมล์สาย 42" },
-    { "bus_id": "bus_003", "bus_number": "65", "description": "รถเมล์สาย 65" },
-    {
-      "bus_id": "bus_b01",
-      "bus_number": "B",
-      "description": "Shuttle Bus สาย B"
-    },
-    {
-      "bus_id": "bus_f01",
-      "bus_number": "F",
-      "description": "Shuttle Bus สาย F"
-    }
-  ],
-
   "transportation_routes": [
     {
-      "route_id": "EXPRESS",
+      "route_id": "EXP",
       "route_name": "EXPRESS",
       "type": "Airport Shuttle",
       "description": "เส้นทางด่วนไปยังอาคารผู้โดยสาร",
@@ -85,21 +69,25 @@
       ]
     },
     {
-      "route_id": "B_LINE",
+      "route_id": "B",
       "route_name": "B LINE",
       "type": "Airport Shuttle",
       "description": "เส้นทาง B LINE",
       "destination_station_id": "S7",
       "stops": [
         { "station_id": "S1", "stop_order": 1, "passing_bus_numbers": ["43"] },
-        { "station_id": "S5", "stop_order": 2, "passing_bus_numbers": ["42", "65"] },
+        {
+          "station_id": "S5",
+          "stop_order": 2,
+          "passing_bus_numbers": ["42", "65"]
+        },
         { "station_id": "S6", "stop_order": 3, "passing_bus_numbers": [] },
         { "station_id": "S7", "stop_order": 4, "passing_bus_numbers": ["41"] },
         { "station_id": "S8", "stop_order": 5, "passing_bus_numbers": [] }
       ]
     },
     {
-      "route_id": "F_LINE",
+      "route_id": "F",
       "route_name": "F LINE",
       "type": "Airport Shuttle",
       "description": "เส้นทาง F LINE",
@@ -113,31 +101,33 @@
       ]
     }
   ],
-
-  "bus_realtime_status": [
+  "bus_arrivals": [
+    {
+      "bus_number": "40",
+      "route_id": "F",
+      "license_plate": "31-7467",
+      "arrival_time": "15:01",
+      "current_station_id": "S1",
+      "latitude": 13.696,
+      "longitude": 100.749
+    },
     {
       "bus_number": "63",
-      "bus_id": "bus_b01",
-      "plate": "34-2307",
-      "line": "B",
-      "next_station_id": "S2",
-      "arrival_time": "17:15"
+      "route_id": "B",
+      "license_plate": "34-2307",
+      "arrival_time": "17:15",
+      "current_station_id": "S2",
+      "latitude": 13.696,
+      "longitude": 100.754
     },
     {
       "bus_number": "66",
-      "bus_id": "bus_001",
-      "plate": "34-2316",
-      "line": "EXPRESS",
-      "next_station_id": "S3",
-      "arrival_time": "17:30"
-    },
-    {
-      "bus_number": "40",
-      "bus_id": "bus_f01",
-      "plate": "31-7467",
-      "line": "F",
-      "next_station_id": "S1",
-      "arrival_time": "18:01"
+      "route_id": "EXP",
+      "license_plate": "34-2316",
+      "arrival_time": "17:30",
+      "current_station_id": "S4",
+      "latitude": 13.696,
+      "longitude": 100.765
     }
   ]
 }

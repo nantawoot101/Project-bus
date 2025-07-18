@@ -3,35 +3,55 @@
 
   <div class="map-wrapper">
     <div id="map"></div>
-    <button
-      class="search-box"
-      ng-show="!isSearching"
-      ng-cloak
-      ng-click="isSearching = true"
-    >
-      <img src="app/assets/icon/search.svg" alt="search" class="search-icon" />
-    </button>
 
-    <div class="search-input-floating" ng-show="isSearching">
-      <img src="app/assets/icon/search.svg" alt="search" class="search-icon" />
-      <input
-        type="text"
-        class="ms-1 search-input"
-        placeholder="คุณจะไปที่ไหน"
-        ng-model="searchQuery"
-        autofocus
-      />
-      <button class="close-btn" ng-click="isSearching = false">×</button>
+    <!-- สเต็ป 1: ปกติ -->
+    <div ng-show="step === 1">
+      <button class="search-box" ng-cloak ng-click="goToSearch('end')">
+        <img src="app/assets/icon/search.svg" alt="search" class="search-icon" />
+      </button>
+
+      <div>
+        <div>
+          <bus-travel></bus-travel>
+        </div>
+      </div>
+    </div>
+
+    <!-- สเต็ป 2: กลับมาจากหน้าค้นหา -->
+    <div class="location-barkground" ng-show="step === 2">
+      <div class="location-header">
+        <button class="back-btn" ng-click="goBack()">
+          <img src="app/assets/icon/chevron-left.svg" alt="back" class="chevron-left-icon" />
+        </button>
+
+        <div class="location-input-wrapper">
+<div class="location-box" ng-click="goToSearch('start')">
+  <img src="app/assets/icon/current-location.svg" class="location-icon" />
+  <input type="text" value="{{ selectedStartStation.name || 'ตำแหน่งของคุณ' }}" readonly />
+</div>
+<div class="location-box" ng-click="goToSearch('end')">
+  <img src="app/assets/icon/location-pin.svg" class="location-icon" />
+  <input type="text" value="{{ selectedEndStation.name || 'เลือกสถานีปลายทาง' }}" readonly />
+</div>
+          <!-- <button class="arrow-up-down">
+            <img src="app/assets/icon/arrow-up-down.svg" alt="" width="24px" height="24px" class="arrow-up-down-icon" />
+          </button> -->
+
+        </div>
+      </div>
+
+
+      <div>
+        <div>
+          <busline></busline>
+        </div>
+      </div>
     </div>
 
     <button class="coser_blue" id="gpsButton" ng-click="Current_Position()">
-      <img class="coser_blue-icon" src="app/assets/icon/gps-navigation.png" alt="">
+      <img class="coser_blue-icon" src="app/assets/icon/gps-navigation.png" alt="" />
     </button>
-
-    <div ng-controller="BusController" class="">
-      <div
-        ng-include="'app/view/map-bus/bottom-sheet/bus-travel/bus-travel.html'"
-      ></div>
-    </div>
   </div>
+</div>
+</div>
 </div>

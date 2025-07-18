@@ -1,15 +1,17 @@
-app.directive('dragHandle', function() {
+app.directive('busline', function() {
   return {
-    restrict: 'A',
-    link: function(scope, element) {
-      const startHandler = function(e) {
-        scope.$applyAsync(() => {
-          scope.startDrag(e);
-        });
-      };
+    restrict: 'E',
+    templateUrl: 'app/view/map-bus/bottom-sheet/bus-line/bus-line.html',
+    controller: 'BuslineController',
+    scope: {}
+  };
+});
 
-      element[0].addEventListener('mousedown', startHandler);
-      element[0].addEventListener('touchstart', startHandler);
-    }
+app.directive('busTravel', function() {
+  return {
+    restrict: 'E',
+    templateUrl: 'app/view/map-bus/bottom-sheet/bus-travel/bus-travel.html',
+    controller: 'BusController',
+    scope: {}
   };
 });
