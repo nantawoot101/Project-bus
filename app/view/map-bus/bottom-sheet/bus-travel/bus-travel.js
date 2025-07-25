@@ -146,24 +146,31 @@ angular
 
       $scope.goToStep = function (step, route, bus) {
         $scope.currentStep = step;
-        // ถ้าเข้าสต็ป 2 ให้เก็บ station ที่เลือกไว้
+
         if (step === 2 && route) {
           $scope.selectedRoute = route;
+          $rootScope.selectedRoute = route; // 👉 ส่ง route ไปยังแผนที่
+          $rootScope.$broadcast("routeSelected", route); // 👉 แจ้ง map ว่ามีการเลือก route แล้ว
         }
 
         if (step === 3) {
-          $scope.selectedBusNumber = bus; // เก็บเบอร์รถที่เลือก
+          $scope.selectedBusNumber = bus;
+          $rootScope.$broadcast("showBus", bus); // แจ้งให้ map แสดงรถบัส
+          $rootScope.$broadcast("clearMap");
         }
       };
 
       $scope.goBackToStep1 = function () {
         $scope.currentStep = 1;
         $scope.selectedRoute = null; // reset ค่า
+        $rootScope.$broadcast("clearMap");
       };
 
       $scope.goBackToStep2 = function () {
         $scope.currentStep = 2;
         $scope.selectedBusNumber = null; // reset ค่า
+        $rootScope.$broadcast("clearBusMap");
+        
       };
 
       // ส่วนจัดการ Step 2
@@ -255,7 +262,5 @@ angular
 
         return "";
       };
-
-      
     }
   );

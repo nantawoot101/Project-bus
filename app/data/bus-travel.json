@@ -21,8 +21,8 @@
     {
       "station_id": "S4",
       "name": "สิ้นสุดสถานีที่ศูนย์การขนส่งสาธารณะ",
-      "latitude": 13.6899,
-      "longitude": 100.7501
+      "latitude": 13.7005,
+      "longitude": 100.7540
     },
     {
       "station_id": "S5",
@@ -47,6 +47,18 @@
       "name": "สะพานลอยหน้าฝ่ายบริการภาคพื้น บริษัท การบินไทย จำกัด (มหาชน)",
       "latitude": 13.698,
       "longitude": 100.752
+    },
+    {
+      "station_id": "S9",
+      "name": "ซานซลาอาคารผู้โดยสาร ชั้น 1 ประตู 8",
+      "latitude": 13.6955,
+      "longitude": 100.7555
+    },
+    {
+      "station_id": "S10",
+      "name": "Bus terminal สุวรรณภูมิ",
+      "latitude": 13.6955,
+      "longitude": 100.7555
     }
   ],
 
@@ -101,6 +113,8 @@
       ]
     }
   ],
+
+  
   "bus_arrivals": [
     {
       "bus_number": "40",
@@ -116,7 +130,7 @@
       "route_id": "B",
       "license_plate": "34-2307",
       "arrival_time": "17:15",
-      "current_station_id": "S2",
+      "current_station_id": "S9",
       "latitude": 13.696,
       "longitude": 100.754
     },
@@ -125,7 +139,7 @@
       "route_id": "EXP",
       "license_plate": "34-2316",
       "arrival_time": "17:30",
-      "current_station_id": "S4",
+      "current_station_id": "S10",
       "latitude": 13.696,
       "longitude": 100.765
     }

@@ -24,19 +24,22 @@
           <img src="app/assets/icon/chevron-left.svg" alt="back" class="chevron-left-icon" />
         </button>
 
-        <div class="location-input-wrapper">
-<div class="location-box" ng-click="goToSearch('start')">
-  <img src="app/assets/icon/current-location.svg" class="location-icon" />
-  <input type="text" value="{{ selectedStartStation.name || 'ตำแหน่งของคุณ' }}" readonly />
-</div>
-<div class="location-box" ng-click="goToSearch('end')">
-  <img src="app/assets/icon/location-pin.svg" class="location-icon" />
-  <input type="text" value="{{ selectedEndStation.name || 'เลือกสถานีปลายทาง' }}" readonly />
-</div>
-          <!-- <button class="arrow-up-down">
-            <img src="app/assets/icon/arrow-up-down.svg" alt="" width="24px" height="24px" class="arrow-up-down-icon" />
-          </button> -->
 
+          <div class="location-input-wrapper">
+            <div class="location-box" ng-click="goToSearch('start')">
+              <img src="app/assets/icon/current-location.svg" class="location-icon" />
+              <input type="text" value="{{ selectedStartStation.name || 'ตำแหน่งของคุณ' }}" readonly />
+            </div>
+            <div class="location-box" ng-click="goToSearch('end')">
+              <img src="app/assets/icon/location-pin.svg" class="location-icon" />
+              <input type="text" value="{{ selectedEndStation.name || 'เลือกสถานีปลายทาง' }}" readonly />
+            </div>
+          </div>
+
+        <div class="local-display">
+          <button class="arrow-up-down" ng-click="swapStations()">
+            <img src="app/assets/icon/arrow-up-down.svg" alt="" width="24px" height="24px" class="arrow-up-down-icon" />
+          </button>
         </div>
       </div>
 
