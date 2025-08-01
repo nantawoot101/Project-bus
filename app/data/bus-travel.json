@@ -70,14 +70,15 @@
       "description": "เส้นทางด่วนไปยังอาคารผู้โดยสาร",
       "destination_station_id": "S3",
       "stops": [
-        { "station_id": "S1", "stop_order": 1, "passing_bus_numbers": ["43"] },
+        { "station_id": "S1", "stop_order": 1, "passing_bus_numbers": ["43"] , "buses_in_transit_to_next_stop": [] },
         {
           "station_id": "S2",
           "stop_order": 2,
-          "passing_bus_numbers": ["42", "65"]
+          "passing_bus_numbers": ["42", "65"],
+          "buses_in_transit_to_next_stop": []
         },
-        { "station_id": "S3", "stop_order": 3, "passing_bus_numbers": [] },
-        { "station_id": "S4", "stop_order": 4, "passing_bus_numbers": ["41"] }
+        { "station_id": "S3", "stop_order": 3, "passing_bus_numbers": [], "buses_in_transit_to_next_stop": ["41"] },
+        { "station_id": "S4", "stop_order": 4, "passing_bus_numbers": [], "buses_in_transit_to_next_stop": [] }
       ]
     },
     {
@@ -87,15 +88,16 @@
       "description": "เส้นทาง B LINE",
       "destination_station_id": "S7",
       "stops": [
-        { "station_id": "S1", "stop_order": 1, "passing_bus_numbers": ["43"] },
+        { "station_id": "S1", "stop_order": 1, "passing_bus_numbers": ["43"] , "buses_in_transit_to_next_stop": [] },
         {
           "station_id": "S5",
           "stop_order": 2,
-          "passing_bus_numbers": ["42", "65"]
+          "passing_bus_numbers": ["42", "65"],
+          "buses_in_transit_to_next_stop": []
         },
-        { "station_id": "S6", "stop_order": 3, "passing_bus_numbers": [] },
-        { "station_id": "S7", "stop_order": 4, "passing_bus_numbers": ["41"] },
-        { "station_id": "S8", "stop_order": 5, "passing_bus_numbers": [] }
+        { "station_id": "S6", "stop_order": 3, "passing_bus_numbers": [],"buses_in_transit_to_next_stop": [] },
+        { "station_id": "S7", "stop_order": 4, "passing_bus_numbers": ["41"],"buses_in_transit_to_next_stop": [] },
+        { "station_id": "S8", "stop_order": 5, "passing_bus_numbers": [],"buses_in_transit_to_next_stop": [] }
       ]
     },
     {
@@ -105,11 +107,11 @@
       "description": "เส้นทาง F LINE",
       "destination_station_id": "S7",
       "stops": [
-        { "station_id": "S1", "stop_order": 1, "passing_bus_numbers": [] },
-        { "station_id": "S5", "stop_order": 2, "passing_bus_numbers": ["39"] },
-        { "station_id": "S6", "stop_order": 3, "passing_bus_numbers": ["40"] },
-        { "station_id": "S7", "stop_order": 4, "passing_bus_numbers": [] },
-        { "station_id": "S8", "stop_order": 5, "passing_bus_numbers": [] }
+        { "station_id": "S1", "stop_order": 1, "passing_bus_numbers": [],"buses_in_transit_to_next_stop": [] },
+        { "station_id": "S5", "stop_order": 2, "passing_bus_numbers": ["39"],"buses_in_transit_to_next_stop": ["45"] },
+        { "station_id": "S6", "stop_order": 3, "passing_bus_numbers": ["40"],"buses_in_transit_to_next_stop": [] },
+        { "station_id": "S7", "stop_order": 4, "passing_bus_numbers": [],"buses_in_transit_to_next_stop": [] },
+        { "station_id": "S8", "stop_order": 5, "passing_bus_numbers": [],"buses_in_transit_to_next_stop": [] }
       ]
     }
   ],

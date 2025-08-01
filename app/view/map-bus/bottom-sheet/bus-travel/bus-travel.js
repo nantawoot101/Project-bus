@@ -58,8 +58,8 @@ angular
         const initialHeight = sheet.offsetHeight;
         const vh = window.innerHeight / 100;
 
-        if ($rootScope.leafletMap?.dragging) {
-          $rootScope.leafletMap.dragging.disable();
+        if ($scope.leafletMap?.dragging) {
+          $scope.leafletMap.dragging.disable();
         }
 
         let currentHeightVH = initialHeight / vh;
@@ -89,8 +89,8 @@ angular
           $document.off("touchmove", onMove);
           $document.off("touchend", onEnd);
 
-          if ($rootScope.leafletMap?.dragging) {
-            $rootScope.leafletMap.dragging.enable();
+          if ($scope.leafletMap?.dragging) {
+            $scope.leafletMap.dragging.enable();
           }
 
           // ✅ Snap ไปที่ระดับใกล้สุด: 30, 45, 60
@@ -149,12 +149,13 @@ angular
 
         if (step === 2 && route) {
           $scope.selectedRoute = route;
-          $rootScope.selectedRoute = route; // 👉 ส่ง route ไปยังแผนที่
-          $rootScope.$broadcast("routeSelected", route); // 👉 แจ้ง map ว่ามีการเลือก route แล้ว
+          $rootScope.selectedRoute = route; // ส่ง route ไปยังแผนที่
+          $rootScope.$broadcast("routeSelected", route); // แจ้ง map ว่ามีการเลือก route แล้ว
         }
 
         if (step === 3) {
           $scope.selectedBusNumber = bus;
+          $scope.busTabOpen = null;
           $rootScope.$broadcast("showBus", bus); // แจ้งให้ map แสดงรถบัส
           $rootScope.$broadcast("clearMap");
         }
@@ -163,6 +164,7 @@ angular
       $scope.goBackToStep1 = function () {
         $scope.currentStep = 1;
         $scope.selectedRoute = null; // reset ค่า
+        $scope.busTabOpen = null;
         $rootScope.$broadcast("clearMap");
       };
 
@@ -170,7 +172,7 @@ angular
         $scope.currentStep = 2;
         $scope.selectedBusNumber = null; // reset ค่า
         $rootScope.$broadcast("clearBusMap");
-        
+        $rootScope.$broadcast("routeSelected", $scope.selectedRoute); // ✅ แก้ตรงนี้
       };
 
       // ส่วนจัดการ Step 2
@@ -205,14 +207,34 @@ angular
         return "";
       };
 
+      $scope.getDotColorClass = function (route_name) {
+        const name = (route_name || "").trim().toUpperCase();
+
+        if (name === "EXPRESS") return "dot-pink";
+        if (name === "B LINE") return "dot-orange";
+        if (name === "F LINE") return "dot-green";
+
+        return "";
+      };
+
+      $scope.toggleBusTab = function (stationId) {
+        $scope.busTabOpen = $scope.busTabOpen === stationId ? null : stationId;
+      };
+
       // ส่วนจัดการ Step 3
       $scope.getLastBusStopOrder = function (route) {
         let lastOrder = 0;
         route.stops.forEach((stop) => {
-          if (
+          const isInPassing =
             stop.passing_bus_numbers &&
-            stop.passing_bus_numbers.includes($scope.selectedBusNumber)
-          ) {
+            stop.passing_bus_numbers.includes($scope.selectedBusNumber);
+          const isInTransit =
+            stop.buses_in_transit_to_next_stop &&
+            stop.buses_in_transit_to_next_stop.includes(
+              $scope.selectedBusNumber
+            );
+
+          if (isInPassing || isInTransit) {
             if (stop.stop_order > lastOrder) {
               lastOrder = stop.stop_order;
             }

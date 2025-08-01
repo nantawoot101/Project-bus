@@ -5,11 +5,13 @@ app.controller(
     let gpsLayer;
     $scope.routeControl = null;
     $scope.mapStations = [];
+    $scope.busMarkers = []; // Array to hold bus markers
 
     $http.get("app/data/bus-travel.json").then(function (response) {
       $scope.transportation_routes = response.data.transportation_routes;
       $scope.stations = response.data.stations;
       $scope.bus_lines_metadata = response.data.bus_lines_metadata;
+      $scope.bus_arrivals = response.data.bus_arrivals; // Load bus arrival data
 
       $rootScope.stations = response.data.stations; // 📌 ให้ Map ใช้ร่วมได้
 
@@ -93,7 +95,7 @@ app.controller(
           L.marker(end, { icon: endStationIcon }).addTo(gpsLayer);
         }
 
-        // Draw route line if both stations exist
+        // 📌 วาดเส้นทางระหว่างสถานีที่เลือก
         if ($scope.selectedStartStation && $scope.selectedEndStation) {
           const start = [
             $scope.selectedStartStation.latitude,
@@ -123,6 +125,60 @@ app.controller(
             show: false,
           }).addTo(map);
         }
+
+        function displayBusArrivals() {
+          // ลบ marker เดิมออกจากแผนที่
+          ($scope.busMarkers || []).forEach((m) =>
+            $rootScope.leafletMap.removeLayer(m)
+          );
+          $scope.busMarkers = [];
+
+          ($scope.bus_arrivals || []).forEach((bus) => {
+            if (!isNaN(bus.latitude) && !isNaN(bus.longitude)) {
+              const marker = L.marker([bus.latitude, bus.longitude], {
+                icon: L.icon({
+                  iconUrl: "app/assets/img/bus.png",
+                  iconSize: [30, 30],
+                  iconAnchor: [15, 15],
+                }),
+              })
+                .addTo($rootScope.leafletMap)
+                .bindPopup(
+                  `<b>Bus ${bus.bus_number}</b><br>Plate: ${bus.license_plate}<br>Arriving: ${bus.arrival_time}`
+                );
+
+              $scope.busMarkers.push(marker);
+            }
+          });
+        }
+
+        $scope.clearAllBusDisplay = function () {
+          const clear = (list) =>
+            (list || []).forEach((m) => $rootScope.leafletMap.removeLayer(m));
+
+          clear($scope.busMarkers);
+          clear($scope.busStationMarkers);
+          ($scope.busRouteLines || []).forEach((l) => l?.remove());
+
+          $scope.busMarkers = [];
+          $scope.busStationMarkers = [];
+          $scope.busRouteLines = [];
+
+          if ($scope.busRoutingControl) {
+            $rootScope.leafletMap.removeControl($scope.busRoutingControl);
+            $scope.busRoutingControl = null;
+          }
+          if ($scope.busMarker) {
+            $rootScope.leafletMap.removeLayer($scope.busMarker);
+            $scope.busMarker = null;
+          }
+        };
+
+        // แสดงรถเมล์เมื่อเข้าสู่ขั้นตอนที่ 2 และล้างข้อมูลเมื่อย้อนกลับไปขั้นตอนที่ 1
+        $scope.$watch("step", function (newVal, oldVal) {
+          if (newVal === 2 && newVal !== oldVal) displayBusArrivals();
+          if (newVal === 1 && newVal !== oldVal) $scope.clearAllBusDisplay();
+        });
 
         // 📌 รับ route ที่ถูกเลือกจาก controller อื่น
         $rootScope.$on("routeSelected", function (event, route) {
@@ -265,16 +321,19 @@ app.controller(
         $rootScope.$on("showBus", function (event, busNumber) {
           if (!$scope.selectedRoute || !busNumber) return;
 
+          // ลบ marker รถบัสเก่า
           if ($scope.busMarker) {
             $rootScope.leafletMap.removeLayer($scope.busMarker);
             $scope.busMarker = null;
           }
 
+          // ลบ routing control เก่า (เส้นทาง)
           if ($scope.busRoutingControl) {
             $rootScope.leafletMap.removeControl($scope.busRoutingControl);
             $scope.busRoutingControl = null;
           }
 
+          // ลบ marker สถานีเก่า
           if ($scope.busStationMarkers && $scope.busStationMarkers.length > 0) {
             $scope.busStationMarkers.forEach((m) =>
               $rootScope.leafletMap.removeLayer(m)
@@ -284,11 +343,13 @@ app.controller(
             $scope.busStationMarkers = [];
           }
 
-          // หาสถานีที่รถบัสอยู่ตอนนี้ จาก selectedRoute.stops
+          // หา index สถานีที่รถบัสอยู่จาก selectedRoute.stops
           const currentStopIndex = $scope.selectedRoute.stops.findIndex(
             (stop) =>
-              stop.passing_bus_numbers &&
-              stop.passing_bus_numbers.includes(busNumber)
+              (stop.passing_bus_numbers &&
+                stop.passing_bus_numbers.includes(busNumber)) ||
+              (stop.buses_in_transit_to_next_stop &&
+                stop.buses_in_transit_to_next_stop.includes(busNumber))
           );
 
           if (currentStopIndex === -1) {
@@ -298,19 +359,18 @@ app.controller(
 
           const routeStops = $scope.selectedRoute.stops;
 
-          // สร้าง station list จาก stops (อิง station_id)
+          // สร้างรายการสถานีจาก stops (โดยจับคู่กับ stations)
           const routeStations = routeStops
             .map((stop) =>
               $scope.stations.find((s) => s.station_id === stop.station_id)
             )
             .filter((s) => s && !isNaN(s.latitude) && !isNaN(s.longitude));
 
-          // ถ้าไม่พอข้อมูลไม่วาด
           if (routeStations.length < 2) return;
 
           const currentStation = routeStations[currentStopIndex];
 
-          // สร้าง Marker รถบัส
+          // สร้าง marker รถบัส
           $scope.busMarker = L.marker(
             [currentStation.latitude, currentStation.longitude],
             {
@@ -322,23 +382,13 @@ app.controller(
             }
           ).addTo($rootScope.leafletMap);
 
-          // วาดสถานีในเส้นทางเท่านั้น
+          // สร้าง marker สถานีตามสถานะ (ผ่าน, ปัจจุบัน, ยังไม่ถึง)
           routeStations.forEach((station, index) => {
             const isPassed = index < currentStopIndex;
             const isCurrent = index === currentStopIndex;
 
             let markerHtml;
-            if (isPassed) {
-              markerHtml = `
-        <div style="display: flex; flex-direction: column; align-items: center;">
-          <div class='station-marker-gray'>
-            ${index + 1}
-          </div>
-          <div class='station-name' style="font-size: 12px; margin-top: 2px; text-align: center; max-width: 80px; ">
-            ${station.name}
-          </div>
-        </div>`;
-            } else if (isCurrent) {
+            if (isPassed || isCurrent) {
               markerHtml = `
         <div style="display: flex; flex-direction: column; align-items: center;">
           <div class='station-marker-gray'>
@@ -373,8 +423,7 @@ app.controller(
             $scope.busStationMarkers.push(marker);
           });
 
-          // วาดเส้นทางระหว่างสถานี: ใช้ Leaflet Routing Machine ทีละช่วง (อิงถนนจริง)
-          const routeName = $scope.selectedRoute.route_name;
+          // ฟังก์ชันกำหนดสีเส้นตามชื่อเส้นทาง
           function getColorByRouteName2(name) {
             switch ((name || "").trim().toUpperCase()) {
               case "EXPRESS":
@@ -400,13 +449,12 @@ app.controller(
             }
           }
 
-          // ลบเส้นทางเดิม
+          // ลบเส้นทางเก่า (ถ้ามี)
           if ($scope.busRouteLines && $scope.busRouteLines.length > 0) {
             $scope.busRouteLines.forEach((line) => {
               if ($rootScope.leafletMap.hasLayer(line)) {
                 $rootScope.leafletMap.removeLayer(line);
               }
-              // ถ้าเป็น Routing control
               if (line && typeof line.remove === "function") {
                 line.remove();
               }
@@ -416,42 +464,40 @@ app.controller(
             $scope.busRouteLines = [];
           }
 
-          // วาด routing ทีละช่วง
-          for (let i = 0; i < routeStations.length - 1; i++) {
-            const from = [routeStations[i].latitude, routeStations[i].longitude];
-            const to = [routeStations[i + 1].latitude, routeStations[i + 1].longitude];
-            let color, borderColor;
-            if (i < currentStopIndex) {
-              // ผ่านแล้ว: สีเทา
-              color = "#bdbdbd";
-              borderColor = "#bdbdbd";
-            } else {
-              // ยังไม่ถึง: สี route
-              color = getColorByRouteName2(routeName);
-              borderColor = getBorderColor2(routeName);
-            }
-            // Routing ทีละช่วง
-            const routingControl = L.Routing.control({
-              waypoints: [L.latLng(from[0], from[1]), L.latLng(to[0], to[1])],
-              router: L.Routing.osrmv1({
-                serviceUrl: "https://router.project-osrm.org/route/v1",
-              }),
-              lineOptions: {
-                styles: [
-                  { color: borderColor, weight: 10, opacity: 1 },
-                  { color: color, weight: 5, opacity: 1 },
-                ],
-              },
-              createMarker: () => null,
-              addWaypoints: false,
-              draggableWaypoints: false,
-              fitSelectedRoutes: false,
-              show: false,
-              routeWhileDragging: false,
-            }).addTo($rootScope.leafletMap);
+          // สร้าง waypoints ทั้งหมดจากสถานี
+          const waypoints = routeStations.map((s) =>
+            L.latLng(s.latitude, s.longitude)
+          );
 
-            $scope.busRouteLines.push(routingControl);
-          }
+          // สร้าง routing control เส้นเดียวต่อเนื่อง
+          const routingControl = L.Routing.control({
+            waypoints: waypoints,
+            router: L.Routing.osrmv1({
+              serviceUrl: "https://router.project-osrm.org/route/v1",
+            }),
+            lineOptions: {
+              styles: [
+                {
+                  color: getBorderColor2($scope.selectedRoute.route_name),
+                  weight: 10,
+                  opacity: 1,
+                },
+                {
+                  color: getColorByRouteName2($scope.selectedRoute.route_name),
+                  weight: 5,
+                  opacity: 1,
+                },
+              ],
+            },
+            createMarker: () => null,
+            addWaypoints: false,
+            draggableWaypoints: false,
+            fitSelectedRoutes: false,
+            show: false,
+            routeWhileDragging: false,
+          }).addTo($rootScope.leafletMap);
+
+          $scope.busRouteLines.push(routingControl);
         });
 
         //ตัวเคลียร์เส้นทาง สถานี และ รถบัส
@@ -496,6 +542,11 @@ app.controller(
         });
 
         window._leafletMapInstance = map;
+
+        // ✅ NEW: If step is 2, display bus markers
+        if ($scope.step === 2 && $scope.bus_arrivals) {
+          displayBusArrivals();
+        }
       }, 100);
     });
 
@@ -529,6 +580,9 @@ app.controller(
         $scope.routeControl = null;
       }
 
+      // Clear bus markers and routes when going back
+      $scope.clearAllBusDisplay();
+
       $scope.selectedStartStation = null;
       $scope.selectedEndStation = null;
       $rootScope.selectedStartStation = null;
@@ -537,7 +591,6 @@ app.controller(
     };
 
     // ฟังก์ชันสำหรับจัดการสลับตำแหน่งสถานี
-
     $scope.swapStations = function () {
       const temp = $scope.selectedStartStation;
       $scope.selectedStartStation = $scope.selectedEndStation;
@@ -607,7 +660,7 @@ app.controller(
           L.marker(end, { icon: endStationIcon }).addTo(gpsLayer);
         }
 
-        // Draw route line if both stations exist
+        // วาดเส้นทางระหว่างสถานีที่เลือกใหม่
         if ($scope.selectedStartStation && $scope.selectedEndStation) {
           const start = [
             $scope.selectedStartStation.latitude,

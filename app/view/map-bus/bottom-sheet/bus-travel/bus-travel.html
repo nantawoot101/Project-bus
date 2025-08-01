@@ -4,8 +4,6 @@
     href="app/view/map-bus/bottom-sheet/bus-travel/bus-travel.css"
   />
 
-
-
   <md-bottom-sheet
     class="custom-bottom-sheet"
     id="bottomSheet"
@@ -82,16 +80,17 @@
           style="position: relative"
         >
           <div class="column-left">
+            <!-- กรณีมี busNumber มากกว่า 1 -->
             <div
               class="bus-wrapper"
               ng-class="getBusClass(selectedRoute.route_name)"
-              ng-if="stop.passing_bus_numbers.length"
+              ng-if="stop.passing_bus_numbers.length > 1"
+              ng-click="toggleBusTab(stop.station_id)"
+              style="cursor: pointer"
             >
               <span
                 class="bus-number-in-rect"
                 ng-repeat="busNumber in stop.passing_bus_numbers"
-                ng-click="goToStep(3, route ,busNumber)"
-                
               >
                 {{ busNumber }}
               </span>
@@ -100,6 +99,45 @@
                 class="bus-img"
                 alt="bus"
               />
+            </div>
+
+            <!-- กรณีมี busNumber เดียว -->
+            <div
+              class="bus-wrapper"
+              ng-class="getBusClass(selectedRoute.route_name)"
+              ng-if="stop.passing_bus_numbers.length === 1"
+              ng-click="goToStep(3, selectedRoute, stop.passing_bus_numbers[0])"
+              style="cursor: pointer"
+            >
+              <span class="bus-number-in-rect">
+                {{ stop.passing_bus_numbers[0] }}
+              </span>
+              <img
+                src="app/assets/icon/bus-simple.svg"
+                class="bus-img"
+                alt="bus"
+              />
+            </div>
+
+            <!-- กรณีแสดงเมนูป็อปอัพด้านล่าง -->
+            <div
+              ng-if="busTabOpen === stop.station_id"
+              class="bus-select-tab-container mt-2"
+            >
+              <select
+                ng-model="selectedBusNumber[stop.station_id]"
+                ng-options="bus for bus in stop.passing_bus_numbers"
+                ng-change="goToStep(3, selectedRoute, selectedBusNumber[stop.station_id])"
+                class="form-control"
+                style="
+                  width: 100%;
+                  padding: 6px;
+                  border-radius: 4px;
+                  border: 1px solid #ccc;
+                "
+              >
+                <option value="" disabled selected>เลือกรถเมล์</option>
+              </select>
             </div>
           </div>
 
@@ -115,8 +153,91 @@
                 <div
                   ng-if="!$last"
                   class="vertical-connector"
-                  ng-class="getVerticalClass(selectedRoute.route_name)"
-                ></div>
+                  ng-class="[
+    getVerticalClass(selectedRoute.route_name),
+    stop.buses_in_transit_to_next_stop.length > 0 ? 'has-bus-in-transit' : ''
+  ]"
+                >
+                  <div
+                    class="bus-in-transit-dot"
+                    ng-if="stop.buses_in_transit_to_next_stop.length > 0"
+                     ng-class="getDotColorClass(selectedRoute.route_name)"
+                  >
+
+                    <!-- แสดง buses_in_transit_to_next_stop กึ่งกลางเส้น -->
+                    <div class="station-stop" style="position: relative">
+                      <div
+                        class="column-left"
+                        ng-if="stop.buses_in_transit_to_next_stop && stop.buses_in_transit_to_next_stop.length > 0"
+                      >
+                        <!-- วางใน .column-left -->
+                        <div
+                          class="bus-in-transit-floating"
+                          ng-if="!$last && stop.buses_in_transit_to_next_stop.length > 0"
+                          
+                        >
+                          <div
+                            class="bus-wrapper"
+                            ng-class="getBusClass(selectedRoute.route_name)"
+                            ng-if="stop.buses_in_transit_to_next_stop.length > 1"
+                          >
+                            <span
+                              class="bus-number-in-rect"
+                              ng-repeat="busNumber in stop.buses_in_transit_to_next_stop"
+                            >
+                              {{ busNumber }}
+                            </span>
+                            <img
+                              src="app/assets/icon/bus-simple.svg"
+                              class="bus-img"
+                              alt="bus"
+                            />
+                          </div>
+
+                          <div
+                            class="bus-wrapper"
+                            ng-class="getBusClass(selectedRoute.route_name)"
+                            ng-if="stop.buses_in_transit_to_next_stop.length === 1"
+                            ng-click="goToStep(3, selectedRoute, stop.buses_in_transit_to_next_stop[0])"
+                            style="cursor: pointer"
+                          >
+                            <span class="bus-number-in-rect">
+                              {{ stop.buses_in_transit_to_next_stop[0] }}
+                            </span>
+                            <img
+                              src="app/assets/icon/bus-simple.svg"
+                              class="bus-img"
+                              alt="bus"
+                            />
+                          </div>
+                        </div>
+
+                        <!-- กรณีแสดงเมนูป็อปอัพด้านล่าง -->
+                        <div
+                          ng-if="busTabOpen === stop.station_id"
+                          class="bus-select-tab-container mt-2"
+                        >
+                          <select
+                            ng-model="selectedBusNumber[stop.station_id]"
+                            ng-options="bus for bus in stop.buses_in_transit_to_next_stop"
+                            ng-change="goToStep(3, selectedRoute, selectedBusNumber[stop.station_id])"
+                            class="form-control"
+                            style="
+                              width: 100%;
+                              padding: 6px;
+                              border-radius: 4px;
+                              border: 1px solid #ccc;
+                            "
+                          >
+                            <option value="" disabled selected>
+                              เลือกรถเมล์
+                            </option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -176,7 +297,6 @@
                 class="number-circle"
                 ng-class="getBorderStep3_Station(selectedRoute, stop)"
                 style="z-index: 2; position: relative"
-                
               >
                 {{ $index + 1 }}
 
@@ -184,7 +304,32 @@
                   ng-if="!$last"
                   class="vertical-connector"
                   ng-class="getConnectorClass(selectedRoute, $index)"
-                ></div>
+                >
+                 <div
+                    class="bus-in-transit-dot"
+                    ng-if="stop.buses_in_transit_to_next_stop.length > 0"
+                     ng-class="getDotColorClass(selectedRoute.route_name)"
+                  >
+                  <div class="column-left">
+                    <div class="bus-in-transit-floating">
+                      <div
+                        class="bus-wrapper"
+                        ng-class="getBusClass(selectedRoute.route_name)"
+                        ng-if="stop.buses_in_transit_to_next_stop.indexOf(selectedBusNumber) !== -1"
+                      >
+                        <span class="bus-number-in-rect">
+                          {{ selectedBusNumber }}
+                        </span>
+                        <img
+                          src="app/assets/icon/bus-simple.svg"
+                          class="bus-img"
+                          alt="bus"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
               </div>
             </div>
 

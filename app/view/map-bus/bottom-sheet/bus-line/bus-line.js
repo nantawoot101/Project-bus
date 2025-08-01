@@ -44,8 +44,8 @@ angular
         const initialHeight = sheet.offsetHeight;
         const vh = window.innerHeight / 100;
 
-        if ($rootScope.leafletMap?.dragging) {
-          $rootScope.leafletMap.dragging.disable();
+        if ($scope.leafletMap?.dragging) {
+          $scope.leafletMap.dragging.disable();
         }
 
         let currentHeightVH = initialHeight / vh;
@@ -75,8 +75,8 @@ angular
           $document.off("touchmove", onMove);
           $document.off("touchend", onEnd);
 
-          if ($rootScope.leafletMap?.dragging) {
-            $rootScope.leafletMap.dragging.enable();
+          if ($scope.leafletMap?.dragging) {
+            $scope.leafletMap.dragging.enable();
           }
 
           // ✅ Snap ไปที่ระดับใกล้สุด: 30, 45, 60
