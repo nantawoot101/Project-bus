@@ -132,3 +132,7 @@
   height: 24px;
   opacity: 0.6;
 }
+
+[ng-cloak] {
+  display: none !important;
+}

@@ -2,16 +2,18 @@ angular
   .module("myApp")
   .controller(
     "BuslineController",
-    function ($scope, $http, $document, $rootScope, $mdBottomSheet) {
-      $http
-        .get("app/data/bus-travel.json")
-        .then(function (response) {
-          $scope.stations = response.data.stations;
-          $scope.bus_arrivals = response.data.bus_arrivals;
-        })
-        .catch(function (error) {
-          console.error("เกิดข้อผิดพลาดในการโหลด JSON", error);
-        });
+    function ($scope, $http, $document, $rootScope, $mdBottomSheet ,BusLineService) {
+      
+      $scope.busStations = [];
+
+      // BusLineService.getBusStation()
+      //   .then(function (response) {
+      //     $scope.busStations = response.data;
+      //     console.log("Bus stations loaded:", $scope.busStations);
+      //   })
+      //   .catch(function (error) {
+      //     console.error("เกิดข้อผิดพลาดในการโหลด bus stations", error);
+      //   });
 
       $scope.getStationNameById = function (stationId) {
         const station = $scope.stations.find((s) => s.station_id === stationId);
@@ -60,8 +62,13 @@ angular
           const deltaY = startY - moveY;
 
           currentHeightVH = (initialHeight + deltaY) / vh;
-          currentHeightVH = Math.max(30, Math.min(60, currentHeightVH));
+          currentHeightVH = Math.max(30, Math.min(80, currentHeightVH));
           sheet.style.height = currentHeightVH + "vh";
+
+          const gpsButton = document.getElementById("gpsButton");
+          if (gpsButton) {
+            gpsButton.style.display = "none";
+          }
 
           buslineGpsButtonPosition(currentHeightVH);
         }
@@ -79,8 +86,8 @@ angular
             $scope.leafletMap.dragging.enable();
           }
 
-          // ✅ Snap ไปที่ระดับใกล้สุด: 30, 45, 60
-          const snapLevels = [30, 45, 60];
+          // ✅ Snap ไปที่ระดับใกล้สุด: 30, 50, 80
+          const snapLevels = [30, 50, 80];
           const closest = snapLevels.reduce((prev, curr) =>
             Math.abs(curr - currentHeightVH) < Math.abs(prev - currentHeightVH)
               ? curr
@@ -88,9 +95,19 @@ angular
           );
 
           sheet.style.height = closest + "vh";
-          buslineGpsButtonPosition(closest);
 
-          $scope.isExpanded = closest >= 45;
+            // ✅ แสดง GPS กลับมา และอัปเดตตำแหน่ง
+          const gpsButton = document.getElementById("gpsButton");
+          if (gpsButton) {
+            // ✅ ปิด animation โดยตรง
+            gpsButton.style.transition = "none"; // ยกเลิก transition
+            gpsButton.style.opacity = "1"; // ให้ปรากฏชัดเจน
+            gpsButton.style.display = "block"; // แสดงปุ่มทันที
+
+            buslineGpsButtonPosition(closest); // อัปเดตตำแหน่งทันที
+          }
+
+          $scope.isExpanded = closest >= 50;
           $scope.$apply();
         }
 

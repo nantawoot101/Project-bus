@@ -5,9 +5,9 @@
     <div id="map"></div>
 
     <!-- สเต็ป 1: ปกติ -->
-    <div ng-show="step === 1">
-      <button class="search-box" ng-cloak ng-click="goToSearch('end')">
-        <img src="app/assets/icon/search.svg" alt="search" class="search-icon" />
+    <div ng-if="step === 1 ">
+      <button class="search-box" ng-cloak ng-click="goToSearch('end')" ng-show="!showBusSelectionModal">
+        <img src="app/assets/icon/search.svg" alt="search" class="search-icon" ng-cloak/>
       </button>
 
       <div>
@@ -18,7 +18,7 @@
     </div>
 
     <!-- สเต็ป 2: กลับมาจากหน้าค้นหา -->
-    <div class="location-barkground" ng-show="step === 2">
+    <div class="location-barkground" ng-show="step === 2 ">
       <div class="location-header">
         <button class="back-btn" ng-click="goBack()">
           <img src="app/assets/icon/chevron-left.svg" alt="back" class="chevron-left-icon" />
@@ -28,11 +28,11 @@
           <div class="location-input-wrapper">
             <div class="location-box" ng-click="goToSearch('start')">
               <img src="app/assets/icon/current-location.svg" class="location-icon" />
-              <input type="text" value="{{ selectedStartStation.name || 'ตำแหน่งของคุณ' }}" readonly />
+              <input type="text" value="{{ selectedStartlocation.locationName || 'ตำแหน่งของคุณ' }}" readonly />
             </div>
             <div class="location-box" ng-click="goToSearch('end')">
               <img src="app/assets/icon/location-pin.svg" class="location-icon" />
-              <input type="text" value="{{ selectedEndStation.name || 'เลือกสถานีปลายทาง' }}" readonly />
+              <input type="text" value="{{ selectedEndlocation.locationName || 'เลือกสถานีปลายทาง' }}" readonly />
             </div>
           </div>
 
@@ -51,7 +51,7 @@
       </div>
     </div>
 
-    <button class="coser_blue" id="gpsButton" ng-click="Current_Position()">
+    <button class="coser_blue" id="gpsButton" ng-click="Current_Position()" ng-show="!showBusSelectionModal">
       <img class="coser_blue-icon" src="app/assets/icon/location-arrow.svg" alt="" />
     </button>
   </div>

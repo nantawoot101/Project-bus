@@ -17,18 +17,19 @@
         class="ms-1 search-input"
         placeholder="คุณจะไปที่ไหน"
         ng-model="searchQuery"
-        ng-change="filterStations()"
+        ng-change="filterLocations()"
         autofocus
       />
       <button class="close-btn" ng-click="clearSearch()">×</button>
     </div>
   </div>
 
-  <div class="result-list" ng-if="filteredStations.length > 0">
+  <!-- เปลี่ยนชื่อ list เป็น filteredLocations และแสดง location.locationName -->
+  <div class="result-list" ng-if="filteredLocations.length > 0">
     <div
       class="result-item"
-      ng-repeat="station in filteredStations"
-      ng-click="selectStation(station)"
+      ng-repeat="location in filteredLocations"
+      ng-click="selectLocation(location)"
     >
       <div class="result-item-inner">
         <div class="search-icon-radius">
@@ -38,7 +39,7 @@
             class="search-icon-mini"
           />
         </div>
-        <span class="station-name">{{ station.name }}</span>
+        <span class="station-name">{{ location.locationName }}</span>
         <div class="arrow-up-left">
           <img src="app/assets/icon/arrow-up-left.svg" alt="" />
         </div>

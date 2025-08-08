@@ -10,25 +10,65 @@
   z-index: 0;
 }
 
-.blue-dot-halo {
-  width: 24px; /* วงแหวนรอบนอกเล็กลง */
+.gps-icon {
+  width: 24px;
   height: 24px;
   background: white;
   border-radius: 50%;
   position: relative;
+  /* เอา animation pulse ออกไป */
 }
 
-.blue-dot-halo::after {
+/* ตัววงกลมด้านใน */
+.gps-icon::after {
   content: "";
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 18px; /* จุดกลางสีฟ้าใหญ่ขึ้น */
+  width: 18px;
   height: 18px;
   background: #2196f3;
   border-radius: 50%;
   transform: translate(-50%, -50%);
 }
+
+.gps-icon::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 100%; 
+  width: 80px;  
+  height: 8px; 
+  background: linear-gradient(
+    to right,
+    rgb(33, 149, 243) 0%,   /* ขอบเข้ม */
+    rgba(33, 150, 243, 0.5) 60%,  /* กลาง */
+    rgba(9, 136, 240, 0) 100%    /* ปลายจาง */
+  );
+  transform: translateY(-50%);
+  border-radius: 2px;
+  filter: blur(8px); /* ลดเบลอลงเล็กน้อย */
+  opacity: 1;  /* เพิ่ม opacity รวม */
+  animation: pulse-light 2s infinite;
+}
+
+@keyframes pulse-light {
+  0% {
+    opacity: 0.7;
+    width: 30px;
+  }
+  50% {
+    opacity: 1;
+    width: 50px;
+  }
+  100% {
+    opacity: 0.9;
+    width: 70px;
+  }
+}
+
+
+
 
 /* ส่วนของการค้นหา */
 .search-box {
@@ -80,7 +120,6 @@
 #gpsButton {
   position: absolute;
   right: 16px;
-  transition: bottom 0.3s ease;
   z-index: 9999; /* อยู่บนสุด */
 }
 
@@ -237,5 +276,10 @@
 */
 
 .leaflet-routing-container {
+  display: none !important;
+}
+
+
+[ng-cloak] {
   display: none !important;
 }

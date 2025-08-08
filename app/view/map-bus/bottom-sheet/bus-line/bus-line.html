@@ -17,7 +17,7 @@
     ></div>
     <div class="font-SL m-l-12 m-t-10">รถที่ผ่าน</div>
 
-   <md-list-item ng-repeat="route in bus_arrivals | orderBy:'arrival_time'">
+   <md-list-item ng-repeat="route in busStations | orderBy:'arrival_time'">
   <div class="bus-flex">
     <div class="bus-box-container">
       <div class="bus-station-box" ng-class="getBusVerticalClass(route.route_id)">
@@ -42,7 +42,7 @@
       </div>
     </div>
 
-    <div class="arrival_time">{{ route.arrival_time | addTimeSuffix }}</div>
+    <div class="arrival_time">{{ route.arrival_time | date:'HH:mm'  }}</div>
   </div>
 </md-list-item>
 

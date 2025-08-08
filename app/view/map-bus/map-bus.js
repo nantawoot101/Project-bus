@@ -1,11 +1,37 @@
 app.controller(
   "MapBusController",
-  function ($scope, $timeout, $rootScope, $state, $window, $http) {
+  function (
+    $scope,
+    $timeout,
+    $rootScope,
+    $state,
+    $window,
+    $http,
+    BusSelectionService
+  ) {
     $scope.step = 1;
     let gpsLayer;
     $scope.routeControl = null;
     $scope.mapStations = [];
-    $scope.busMarkers = []; // Array to hold bus markers
+    $scope.busMarkers = [];
+
+    // ตัวจัดการซ่อนตข้อมูลบางส่วน เมื่อ modal ถูกเปิดขึ้น
+    const selectedData = BusSelectionService.getSelectedData();
+    $scope.showBusSelectionModal = selectedData.showBusSelectionModal;
+
+    $scope.$watch(
+      function () {
+        return BusSelectionService.getSelectedData().showBusSelectionModal;
+      },
+      function (newVal) {
+        $scope.showBusSelectionModal = newVal;
+
+        if (newVal) {
+          $scope.selectedBusData = BusSelectionService.getSelectedData();
+        }
+      }
+    );
+    //===============================================================================
 
     $http.get("app/data/bus-travel.json").then(function (response) {
       $scope.transportation_routes = response.data.transportation_routes;
@@ -30,8 +56,8 @@ app.controller(
         );
 
         const map = L.map("map", {
-          center: [13.6904, 100.7501],
-          zoom: 13,
+          center: [13.7563, 100.5018],
+          zoom: 16,
           zoomControl: false,
           layers: [roadMap],
           attributionControl: false,
@@ -43,18 +69,46 @@ app.controller(
         $scope.map = map;
         $rootScope.leafletMap = map;
 
+
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            function (position) {
+              const lat = position.coords.latitude;
+              const lng = position.coords.longitude;
+
+              // สร้าง div icon
+              const gpsIcon = L.divIcon({
+                className: "gps-icon",
+                html: '<div class="gps-dot"></div>', // HTML ที่ใช้เป็น icon
+                iconSize: [24, 24],
+                iconAnchor: [12, 12],
+              });
+
+              // สร้าง marker
+              const gpsMarker = L.marker([lat, lng], { icon: gpsIcon });
+              gpsMarker.addTo(gpsLayer);
+
+              // เลื่อนแผนที่ไปตำแหน่งผู้ใช้
+              map.setView([lat, lng], 16);
+            },
+            function (error) {
+              console.error("ไม่สามารถดึงตำแหน่งได้", error);
+            }
+          );
+        }
+
         const startStationIcon = L.divIcon({
           className: "",
           html: `
-          <div style="display: flex; flex-direction: column; align-items: center;">
-            <div class='station-marker'>
-              <img src='app/assets/icon/current-location.svg' width='20' height='20'>
-            </div>
-            <div class='station-name'>${
-              $scope.selectedStartStation?.name || ""
-            }</div>
-          </div>
-        `,
+    <div style="display: flex; flex-direction: column; align-items: center;">
+      <div class='station-marker'>
+        <img src='app/assets/icon/current-location.svg' width='20' height='20'>
+      </div>
+      <div class='station-name'>${
+        $scope.selectedStartlocation?.locationName || ""
+      }</div>
+    </div>
+  `,
           iconSize: [30, 52],
           iconAnchor: [15, 52],
         });
@@ -62,48 +116,46 @@ app.controller(
         const endStationIcon = L.divIcon({
           className: "",
           html: `
-          <div style="display: flex; flex-direction: column; align-items: center;">
-            <div class='station-marker'>
-              <img src='app/assets/icon/location-pin.svg' width='20' height='20'>
-            </div>
-            <div class='station-name'>${
-              $scope.selectedEndStation?.name || ""
-            }</div>
-          </div>
-        `,
+    <div style="display: flex; flex-direction: column; align-items: center;">
+      <div class='station-marker'>
+        <img src='app/assets/icon/location-pin.svg' width='20' height='20'>
+      </div>
+      <div class='station-name'>${
+        $scope.selectedEndlocation?.locationName || ""
+      }</div>
+    </div>
+  `,
           iconSize: [30, 52],
           iconAnchor: [15, 52],
         });
 
-        // Add start station marker
-        if ($scope.selectedStartStation) {
+        // Add start marker
+        if ($scope.selectedStartlocation) {
           const start = [
-            $scope.selectedStartStation.latitude,
-            $scope.selectedStartStation.longitude,
+            $scope.selectedStartlocation.latitude,
+            $scope.selectedStartlocation.longitude,
           ];
-
           L.marker(start, { icon: startStationIcon }).addTo(gpsLayer);
         }
 
-        // Add end station marker
-        if ($scope.selectedEndStation) {
+        // Add end marker
+        if ($scope.selectedEndlocation) {
           const end = [
-            $scope.selectedEndStation.latitude,
-            $scope.selectedEndStation.longitude,
+            $scope.selectedEndlocation.latitude,
+            $scope.selectedEndlocation.longitude,
           ];
-
           L.marker(end, { icon: endStationIcon }).addTo(gpsLayer);
         }
 
-        // 📌 วาดเส้นทางระหว่างสถานีที่เลือก
-        if ($scope.selectedStartStation && $scope.selectedEndStation) {
+        // Draw route
+        if ($scope.selectedStartlocation && $scope.selectedEndlocation) {
           const start = [
-            $scope.selectedStartStation.latitude,
-            $scope.selectedStartStation.longitude,
+            $scope.selectedStartlocation.latitude,
+            $scope.selectedStartlocation.longitude,
           ];
           const end = [
-            $scope.selectedEndStation.latitude,
-            $scope.selectedEndStation.longitude,
+            $scope.selectedEndlocation.latitude,
+            $scope.selectedEndlocation.longitude,
           ];
 
           if ($scope.routeControl) {
@@ -126,69 +178,19 @@ app.controller(
           }).addTo(map);
         }
 
-        function displayBusArrivals() {
-          // ลบ marker เดิมออกจากแผนที่
-          ($scope.busMarkers || []).forEach((m) =>
-            $rootScope.leafletMap.removeLayer(m)
-          );
-          $scope.busMarkers = [];
-
-          ($scope.bus_arrivals || []).forEach((bus) => {
-            if (!isNaN(bus.latitude) && !isNaN(bus.longitude)) {
-              const marker = L.marker([bus.latitude, bus.longitude], {
-                icon: L.icon({
-                  iconUrl: "app/assets/img/bus.png",
-                  iconSize: [30, 30],
-                  iconAnchor: [15, 15],
-                }),
-              })
-                .addTo($rootScope.leafletMap)
-                .bindPopup(
-                  `<b>Bus ${bus.bus_number}</b><br>Plate: ${bus.license_plate}<br>Arriving: ${bus.arrival_time}`
-                );
-
-              $scope.busMarkers.push(marker);
-            }
-          });
-        }
-
-        $scope.clearAllBusDisplay = function () {
-          const clear = (list) =>
-            (list || []).forEach((m) => $rootScope.leafletMap.removeLayer(m));
-
-          clear($scope.busMarkers);
-          clear($scope.busStationMarkers);
-          ($scope.busRouteLines || []).forEach((l) => l?.remove());
-
-          $scope.busMarkers = [];
-          $scope.busStationMarkers = [];
-          $scope.busRouteLines = [];
-
-          if ($scope.busRoutingControl) {
-            $rootScope.leafletMap.removeControl($scope.busRoutingControl);
-            $scope.busRoutingControl = null;
-          }
-          if ($scope.busMarker) {
-            $rootScope.leafletMap.removeLayer($scope.busMarker);
-            $scope.busMarker = null;
-          }
-        };
-
-        // แสดงรถเมล์เมื่อเข้าสู่ขั้นตอนที่ 2 และล้างข้อมูลเมื่อย้อนกลับไปขั้นตอนที่ 1
-        $scope.$watch("step", function (newVal, oldVal) {
-          if (newVal === 2 && newVal !== oldVal) displayBusArrivals();
-          if (newVal === 1 && newVal !== oldVal) $scope.clearAllBusDisplay();
-        });
-
-        // 📌 รับ route ที่ถูกเลือกจาก controller อื่น
         $rootScope.$on("routeSelected", function (event, route) {
+          if (!route || !route.stops) {
+            console.warn("route หรือ route.stops ไม่พร้อมใช้งาน:", route);
+            return; // ออกจาก handler ก่อน ไม่ทำงานต่อ
+          }
+
           const stationIds = route.stops.map((stop) => stop.station_id);
           const allStations = $rootScope.stations || [];
           $scope.mapStations = allStations.filter((s) =>
             stationIds.includes(s.station_id)
           );
 
-          drawStationsOnMap($scope.mapStations, route.route_name); // 👈 เพิ่ม route_name
+          drawStationsOnMap($scope.mapStations, route.route_name);
         });
 
         $rootScope.$on("clearMap", function () {
@@ -542,62 +544,47 @@ app.controller(
         });
 
         window._leafletMapInstance = map;
-
-        // ✅ NEW: If step is 2, display bus markers
-        if ($scope.step === 2 && $scope.bus_arrivals) {
-          displayBusArrivals();
-        }
       }, 100);
     });
-
-    $scope.Current_Position = function () {
-      $timeout(() => {
-        $scope.map.locate({ setView: true, maxZoom: 16 });
-      }, 100);
-    };
 
     $scope.goToSearch = function (target) {
       $rootScope.searchTarget = target;
       $state.go("search");
     };
 
-    $scope.selectedStartStation = $rootScope.selectedStartStation || null;
-    $scope.selectedEndStation = $rootScope.selectedEndStation || null;
+    $scope.selectedStartlocation = $rootScope.selectedStartlocation || null;
+    $scope.selectedEndlocation = $rootScope.selectedEndlocation || null;
 
-    if ($scope.selectedStartStation || $scope.selectedEndStation) {
+    if ($scope.selectedStartlocation || $scope.selectedEndlocation) {
       $scope.step = 2;
     }
 
-    $scope.goBack = function () {
-      $scope.step = 1;
+   $scope.goBack = function () {
+  $scope.step = 1;
 
-      if (gpsLayer) {
-        gpsLayer.clearLayers();
-      }
+  if (gpsLayer) {
+    gpsLayer.clearLayers();
+  }
 
-      if ($scope.routeControl) {
-        $scope.map.removeControl($scope.routeControl);
-        $scope.routeControl = null;
-      }
+  if ($scope.routeControl) {
+    $scope.map.removeControl($scope.routeControl);
+    $scope.routeControl = null;
+  }
 
-      // Clear bus markers and routes when going back
-      $scope.clearAllBusDisplay();
+  // ล้างข้อมูลตำแหน่งเริ่มต้นและสิ้นสุด
+  $rootScope.selectedStartlocation = null;
+  $rootScope.selectedEndlocation = null;
+};
 
-      $scope.selectedStartStation = null;
-      $scope.selectedEndStation = null;
-      $rootScope.selectedStartStation = null;
-      $rootScope.selectedEndStation = null;
-      $rootScope.searchTarget = null;
-    };
 
     // ฟังก์ชันสำหรับจัดการสลับตำแหน่งสถานี
     $scope.swapStations = function () {
-      const temp = $scope.selectedStartStation;
-      $scope.selectedStartStation = $scope.selectedEndStation;
-      $scope.selectedEndStation = temp;
+      const temp = $scope.selectedStartlocation;
+      $scope.selectedStartlocation = $scope.selectedEndlocation;
+      $scope.selectedEndlocation = temp;
 
-      $rootScope.selectedStartStation = $scope.selectedStartStation;
-      $rootScope.selectedEndStation = $scope.selectedEndStation;
+      $rootScope.selectedStartlocation = $scope.selectedStartlocation;
+      $rootScope.selectedEndlocation = $scope.selectedEndlocation;
 
       // รีเฟรช marker และเส้นทางบนแผนที่
       $timeout(function () {
@@ -618,7 +605,7 @@ app.controller(
             <img src='app/assets/icon/current-location.svg' width='20' height='20'>
           </div>
           <div class='station-name'>${
-            $scope.selectedStartStation?.name || ""
+            $scope.selectedStartlocation?.locationName || ""
           }</div>
         </div>
       `,
@@ -634,7 +621,7 @@ app.controller(
             <img src='app/assets/icon/location-pin.svg' width='20' height='20'>
           </div>
           <div class='station-name'>${
-            $scope.selectedEndStation?.name || ""
+            $scope.selectedEndlocation?.locationName || ""
           }</div>
         </div>
       `,
@@ -643,32 +630,32 @@ app.controller(
         });
 
         // Add start station marker
-        if ($scope.selectedStartStation) {
+        if ($scope.selectedStartlocation) {
           const start = [
-            $scope.selectedStartStation.latitude,
-            $scope.selectedStartStation.longitude,
+            $scope.selectedStartlocation.latitude,
+            $scope.selectedStartlocation.longitude,
           ];
           L.marker(start, { icon: startStationIcon }).addTo(gpsLayer);
         }
 
         // Add end station marker
-        if ($scope.selectedEndStation) {
+        if ($scope.selectedEndlocation) {
           const end = [
-            $scope.selectedEndStation.latitude,
-            $scope.selectedEndStation.longitude,
+            $scope.selectedEndlocation.latitude,
+            $scope.selectedEndlocation.longitude,
           ];
           L.marker(end, { icon: endStationIcon }).addTo(gpsLayer);
         }
 
         // วาดเส้นทางระหว่างสถานีที่เลือกใหม่
-        if ($scope.selectedStartStation && $scope.selectedEndStation) {
+        if ($scope.selectedStartlocation && $scope.selectedEndlocation) {
           const start = [
-            $scope.selectedStartStation.latitude,
-            $scope.selectedStartStation.longitude,
+            $scope.selectedStartlocation.latitude,
+            $scope.selectedStartlocation.longitude,
           ];
           const end = [
-            $scope.selectedEndStation.latitude,
-            $scope.selectedEndStation.longitude,
+            $scope.selectedEndlocation.latitude,
+            $scope.selectedEndlocation.longitude,
           ];
 
           $scope.routeControl = L.Routing.control({
