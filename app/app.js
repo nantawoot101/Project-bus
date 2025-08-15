@@ -34,7 +34,6 @@ app.run(function ($rootScope, AuthenService) {
     } else {
         // ใช้ token เดิม
         $rootScope.token = localStorage.getItem("access_token");
-        console.log("✅ ใช้ Token เดิมจาก localStorage");
         console.log("Token: ", $rootScope.token);
     }
 });

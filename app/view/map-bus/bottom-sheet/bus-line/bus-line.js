@@ -86,8 +86,7 @@ angular
             $scope.leafletMap.dragging.enable();
           }
 
-          // ✅ Snap ไปที่ระดับใกล้สุด: 30, 50, 80
-          const snapLevels = [30, 50, 80];
+          const snapLevels = [30, 60, 80];
           const closest = snapLevels.reduce((prev, curr) =>
             Math.abs(curr - currentHeightVH) < Math.abs(prev - currentHeightVH)
               ? curr

@@ -1,8 +1,8 @@
 app.service('BusSelectionService', function () {
   var selectedData = {
     busNumber: null,
-    stop: null,
-    route: null,
+    stations: null,
+    busLines: null,
     isTransit: false,
     showBusSelectionModal: false
   };
@@ -14,11 +14,11 @@ app.service('BusSelectionService', function () {
     setBusNumber: function (busNumber) {
       selectedData.busNumber = busNumber;
     },
-    setStop: function (stop) {
-      selectedData.stop = stop;
+    setStation: function (stations) {
+      selectedData.stations = stations;
     },
-    setRoute: function (route) {
-      selectedData.route = route;
+    setBusLine: function (busLines) {
+      selectedData.busLines = busLines;
     },
     setTransitMode: function (isTransit) {
       selectedData.isTransit = isTransit;

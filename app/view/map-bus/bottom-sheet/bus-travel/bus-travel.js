@@ -12,175 +12,94 @@ angular
       BusLineService,
       $stateParams
     ) {
-      
-      $scope.sheetHeightVH = 30; // ✅ เพิ่มตัวแปรเก็บความสูงล่าสุดของ bottomSheet
-
+      $scope.sheetHeightVH = 30;
+      $scope.step = 1;
+      $scope.selectedRoute = null;
       $scope.busLines = [];
-
-      // $scope.transportation_routes = [];
-      // $http
-      //   .get("app/data/bus-travel.json")
-      //   .then(function (response) {
-      //     $scope.transportation_routes = response.data.transportation_routes;
-      //     $scope.stations = response.data.stations;
-      //     $scope.bus_lines_metadata = response.data.bus_lines_metadata;
-      //   })
-      //   .catch(function (error) {
-      //     console.error("เกิดข้อผิดพลาดในการโหลด JSON", error);
-      //   });
-
-      // $scope.getStationName = function (station_id) {
-      //   const station = ($scope.stations || []).find(
-      //     (s) => s.station_id === station_id
-      //   );
-      //   return station ? station.name : "ไม่พบสถานี";
-      // };
-
-      // $scope.getBusNumber = function (bus_id) {
-      //   const bus = ($scope.bus_lines_metadata || []).find(
-      //     (b) => b.bus_id === bus_id
-      //   );
-      //   return bus ? bus.bus_number : "ไม่ทราบหมายเลขรถ";
-      // };
-
-      BusLineService.getBusLine()
-        .then(function (response) {
-          $scope.busLines = response.data;
-          console.log("Bus Lines loaded:", $scope.busLines);
-        })
-        .catch(function (error) {
-          console.error("เกิดข้อผิดพลาดในการโหลด bus Lines", error);
-        });
-
-      $scope.busLine = {}; // สำหรับเก็บข้อมูลที่ได้จาก API
-      var busLineId = $stateParams.busLineId;
-
-      BusLineService.getBusLineById(busLineId)
-        .then(function (response) {
-          $scope.busLine = response.data;
-
-          if (
-            $scope.busLine &&
-            Array.isArray($scope.busLine.busLineStations) &&
-            $scope.busLine.busLineStations.length > 0
-          ) {
-            $scope.startStation = $scope.busLine.busLineStations[0];
-            $scope.endStation =
-              $scope.busLine.busLineStations[
-                $scope.busLine.busLineStations.length - 1
-              ];
-          } else {
-            console.warn("busLineStations ว่างหรือไม่ใช่ array");
-          }
-        })
-        .catch(function (error) {
-          console.error("โหลดข้อมูลสายรถเมล์ล้มเหลว", error);
-        });
-
+      $scope.busLineStationsMap = {};
       $scope.current = [];
+      $scope.selectedBusNumber = null;
 
-      BusLineService.getCurrent()
-        .then(function (response) {
-          const allBuses = response.data.buses; // ✅ ดึง array จริง ๆ ออกมา
+      // --- โหลด busLines และ stations ---
+      BusLineService.getBusLine()
+        .then((response) => {
+          $scope.busLines = response.data;
 
-          if (!Array.isArray(allBuses)) {
-            console.error("❌ response.data.buses ไม่ใช่ array:", allBuses);
-            return;
-          }
+          let promises = $scope.busLines.map((line) => {
+            return BusLineService.getBusLineById(line.busLineId).then((res) => {
+              let stations = Array.isArray(res.data)
+                ? res.data
+                : res.data.busLineStations || [];
 
-          const selectedBusLineId = $scope.selectedBusLineId;
+              if (stations.length > 0 && stations[0].busLineStations) {
+                stations = stations[0].busLineStations;
+              }
 
-          $scope.current = allBuses.filter(function (bus) {
-            return bus.busLineId === selectedBusLineId;
+              $scope.busLineStationsMap[line.busLineId] = stations;
+              line.busLineStations = stations;
+              line.endLocationName =
+                stations.length > 0
+                  ? stations[stations.length - 1].locationName
+                  : "ไม่พบข้อมูลปลายทาง";
+            });
           });
 
-          console.log("Bus current filtered:", $scope.current);
+          Promise.all(promises).then(() => {
+            if (!$scope.$$phase) $scope.$apply();
+            console.log("Updated busLines:", $scope.busLines);
+          });
         })
-        .catch(function (error) {
-          console.error("เกิดข้อผิดพลาดในการโหลด current", error);
+        .catch((error) => {
+          console.error("Error loading busLines:", error);
         });
 
-        
-
-      $scope.getBorderClass = function (busGroupId) {
-        busGroupId = (busGroupId || "").trim().toUpperCase();
-
-        if (busGroupId === "11") return "border-pink";
-        if (busGroupId === "21") return "border-orange";
-        if (busGroupId === "31") return "border-green";
-        if (busGroupId === "") return "border-gray";
-
-        return "";
-      };
-
-      $scope.isExpanded = false;
-
-      $scope.listItemClick = function ($index) {
-        var clickedItem = $scope.items[$index];
-        $mdBottomSheet.hide(clickedItem);
-      };
-
+      // --- Drag Bottom Sheet ---
       $scope.startDrag = function (event) {
         event.preventDefault();
         event.stopPropagation();
-
         const isTouchEvent = event.type.startsWith("touch");
         const sheet = document.getElementById("bottomSheet");
         const startY = isTouchEvent ? event.touches[0].pageY : event.pageY;
         const initialHeight = sheet.offsetHeight;
         const vh = window.innerHeight / 100;
-
         if ($scope.leafletMap?.dragging) {
           $scope.leafletMap.dragging.disable();
         }
-
         let currentHeightVH = initialHeight / vh;
-
         function onMove(e) {
           e.preventDefault();
           e.stopPropagation();
-
           const gpsButton = document.getElementById("gpsButton");
           if (gpsButton) {
             gpsButton.style.display = "none";
           }
-
           const moveY = e.type.startsWith("touch")
             ? e.touches[0].pageY
             : e.pageY;
           const deltaY = startY - moveY;
-
           currentHeightVH = (initialHeight + deltaY) / vh;
-          currentHeightVH = Math.max(30, Math.min(80, currentHeightVH));
+          currentHeightVH = Math.max(30, Math.min(90, currentHeightVH));
           sheet.style.height = currentHeightVH + "vh";
-
           updateGpsButtonPosition(currentHeightVH);
         }
-
         function onEnd(e) {
           e.preventDefault();
           e.stopPropagation();
-
           $document.off("mousemove", onMove);
           $document.off("mouseup", onEnd);
           $document.off("touchmove", onMove);
           $document.off("touchend", onEnd);
-
           if ($scope.leafletMap?.dragging) {
             $scope.leafletMap.dragging.enable();
           }
-
-          // ✅ Snap ไปที่ระดับใกล้สุด
-          const snapLevels = [30, 50, 80];
+          const snapLevels = [30, 60, 90];
           const closest = snapLevels.reduce((prev, curr) =>
             Math.abs(curr - currentHeightVH) < Math.abs(prev - currentHeightVH)
               ? curr
               : prev
           );
-
-          $scope.sheetHeightVH = closest; // ✅ เก็บค่าความสูงไว้ใน scope
+          $scope.sheetHeightVH = closest;
           sheet.style.height = $scope.sheetHeightVH + "vh";
-
           const gpsButton = document.getElementById("gpsButton");
           if (gpsButton) {
             gpsButton.style.transition = "none";
@@ -188,238 +107,242 @@ angular
             gpsButton.style.display = "block";
             updateGpsButtonPosition($scope.sheetHeightVH);
           }
-
           $scope.isExpanded = $scope.sheetHeightVH >= 50;
           $scope.$apply();
         }
-
         $document.on("mousemove", onMove);
         $document.on("mouseup", onEnd);
         $document.on("touchmove", onMove);
         $document.on("touchend", onEnd);
       };
-
       window.startDrag = $scope.startDrag;
-
       function updateGpsButtonPosition(bottomSheetHeightVH) {
         const gpsButton = document.getElementById("gpsButton");
         if (!gpsButton) return;
-
         const vh = window.innerHeight / 100;
         const screenWidth = window.innerWidth;
         let offsetY;
-
         if (screenWidth <= 767) {
           offsetY = -8 * vh;
         } else {
           offsetY = -4 * vh;
         }
-
         const bottomPx = bottomSheetHeightVH * vh + offsetY;
         gpsButton.style.bottom = bottomPx + "px";
       }
 
-      $scope.step = 1;
-      $scope.selectedRoute = null;
+      // --- Map buses to stations ---
+      function mapBusesToStations() {
+        if (!$scope.selectedRoute || !$scope.selectedRoute.busLineStations)
+          return;
 
+        const distanceThreshold = 0.0005;
 
-       $scope.goToStep = function (step, route, bus) {
-        $scope.step = step;
+        $scope.selectedRoute.busLineStations.forEach((station, index, arr) => {
+          station.passing_bus_numbers = [];
+          station.buses_in_transit_to_next_stop = [];
+        });
 
-        // ✅ ตั้งความสูง sheet ทุกครั้งหลังเปลี่ยน step (ใช้ค่าที่จำไว้)
-        setTimeout(() => {
-          const sheet = document.getElementById("bottomSheet");
-          if (sheet) {
-            sheet.style.height = $scope.sheetHeightVH + "vh";
-            updateGpsButtonPosition($scope.sheetHeightVH);
+        $scope.current.forEach((bus) => {
+          // ดึงค่าพิกัด
+          const busLat =
+            bus.latitude ||
+            bus.lat ||
+            (bus.gps && (bus.gps.latitude || bus.gps.lat));
+          const busLng =
+            bus.longitude ||
+            bus.lng ||
+            (bus.gps && (bus.gps.longitude || bus.gps.lng));
+
+          if (busLat == null || busLng == null) return;
+
+          // กรองเฉพาะ Step 3 ถ้ามี bus เลือก
+          if ($scope.step === 3 && $scope.selectedBusNumber) {
+            if (String(bus.vehicleName) !== String($scope.selectedBusNumber))
+              return;
           }
-        }, 100);
 
-        if (step === 2 && route) {
-          $scope.selectedRoute = route;
-          $rootScope.selectedRoute = route;
-          $rootScope.$broadcast("routeSelected", route);
-        }
+          let assigned = false; // flag สำหรับรถคันนี้
 
-        if (step === 3) {
-          $scope.selectedBusNumber = bus;
-          $scope.busTabOpen = null;
-          $rootScope.$broadcast("showBus", bus);
-          $rootScope.$broadcast("clearMap");
+          $scope.selectedRoute.busLineStations.forEach(
+            (station, index, arr) => {
+              if (assigned) return; // ถ้า assign แล้ว ข้าม
+
+              const latDiff = Math.abs(busLat - station.latitude);
+              const lngDiff = Math.abs(busLng - station.longitude);
+
+              if (
+                latDiff <= distanceThreshold &&
+                lngDiff <= distanceThreshold
+              ) {
+                // รถจอดตรงสถานี
+                station.passing_bus_numbers.push(bus.vehicleName);
+                assigned = true; // assign แล้ว
+              } else if (!assigned && index < arr.length - 1) {
+                // รถอยู่ระหว่างสถานี
+                const nextStation = arr[index + 1];
+                const distanceToLine = distanceToSegment(
+                  busLat,
+                  busLng,
+                  station.latitude,
+                  station.longitude,
+                  nextStation.latitude,
+                  nextStation.longitude
+                );
+                if (distanceToLine <= distanceThreshold) {
+                  station.buses_in_transit_to_next_stop.push(bus.vehicleName);
+                  assigned = true; // assign แล้ว
+                }
+              }
+            }
+          );
+        });
+
+        console.log(
+          "Stations after mapping:",
+          $scope.selectedRoute.busLineStations
+        );
+
+      }
+
+      function distanceToSegment(px, py, x1, y1, x2, y2) {
+        const A = px - x1,
+          B = py - y1,
+          C = x2 - x1,
+          D = y2 - y1;
+        const dot = A * C + B * D;
+        const len_sq = C * C + D * D;
+        const param = len_sq !== 0 ? dot / len_sq : -1;
+        let xx, yy;
+        if (param < 0) {
+          xx = x1;
+          yy = y1;
+        } else if (param > 1) {
+          xx = x2;
+          yy = y2;
+        } else {
+          xx = x1 + param * C;
+          yy = y1 + param * D;
         }
+        return Math.sqrt((px - xx) ** 2 + (py - yy) ** 2);
+      }
+
+      $scope.loadBusLineAndCurrent = function (busLineId) {
+        $scope.selectedRoute = null; // ✅ เคลียร์ก่อนโหลด
+        $rootScope.selectedRoute = null;
+
+        return Promise.all([
+          BusLineService.getBusLineById(busLineId).then((response) => {
+            if (Array.isArray(response.data) && response.data.length > 0) {
+              $scope.selectedRoute = response.data[0];
+              // ให้ station ชี้ไปที่ busLineStations
+              $scope.selectedRoute.station =
+                $scope.selectedRoute.busLineStations || [];
+            } else {
+              $scope.selectedRoute = { station: [] };
+            }
+            $rootScope.selectedRoute = $scope.selectedRoute;
+          }),
+
+          BusLineService.getCurrent().then((res) => {
+            const allBuses = Array.isArray(res.data.buses)
+              ? res.data.buses
+              : [];
+            if ($scope.step === 3 && $scope.selectedBusNumber) {
+              $scope.current = allBuses.filter(
+                (bus) =>
+                  String(bus.vehicleName) === String($scope.selectedBusNumber)
+              );
+            } else {
+              $scope.current = allBuses.filter(
+                (bus) => String(bus.busLineId) === String(busLineId)
+              );
+            }
+            mapBusesToStations();
+            $scope.$applyAsync();
+          }),
+        ]);
       };
 
-      // $scope.goToStep = function (step, busLineId, bus) {
-      //   $scope.step = step;
+      // --- Step change ---
+      $scope.goToStep = function (step, busLineId, bus) {
+        $scope.step = step;
+      
 
-      //   setTimeout(() => {
-      //     const sheet = document.getElementById("bottomSheet");
-      //     if (sheet) {
-      //       sheet.style.height = $scope.sheetHeightVH + "vh";
-      //       updateGpsButtonPosition($scope.sheetHeightVH);
-      //     }
-      //   }, 100);
+        if (step === 2 && busLineId) {
+          $scope.loadBusLineAndCurrent(busLineId).then(() => {
+            $rootScope.$broadcast("routeSelected", $scope.selectedRoute);
+            $rootScope.$broadcast("clearMap");
+          });
+        }
 
-      //   if (step === 2 && busLineId) {
-      //     const route = $scope.busLines.find(
-      //       (line) => line.busLineId === busLineId
-      //     );
-      //     if (route) {
-      //       $scope.selectedRoute = route;
-      //       $rootScope.selectedRoute = route;
-      //       $rootScope.$broadcast("routeSelected", route);
-      //     } else {
-      //       console.warn("ไม่พบ route สำหรับ busLineId:", busLineId);
-      //     }
-      //   }
-
-      //   if (step === 3) {
-      //     $scope.selectedBusNumber = bus;
-      //     $scope.busTabOpen = null;
-      //     $rootScope.$broadcast("showBus", bus);
-      //     $rootScope.$broadcast("clearMap");
-      //   }
-      // };
+        if (step === 3 && busLineId) {
+          $rootScope.$broadcast("clearMap");
+          $scope.loadBusLineAndCurrent(busLineId).then(() => {
+            if (
+              $scope.selectedRoute &&
+              Array.isArray($scope.selectedRoute.station)
+            ) {
+              $rootScope.$broadcast("showBus", $scope.selectedBusNumber);
+            } else {
+              console.warn("❌ ไม่มีข้อมูลสถานีใน selectedRoute");
+            }
+          });
+        }
+      };
 
       $scope.goBackToStep1 = function () {
         $scope.step = 1;
         $scope.selectedRoute = null;
-        $scope.busTabOpen = null;
+        $scope.selectedBusNumber = null;
         $rootScope.$broadcast("clearMap");
       };
 
-      $scope.goBackToStep2 = function () {
+      $scope.goBackToStep2 = function (busLineId) {
         $scope.step = 2;
         $scope.selectedBusNumber = null;
         $rootScope.$broadcast("clearBusMap");
         $rootScope.$broadcast("routeSelected", $scope.selectedRoute);
-      };
+        };
 
-      $scope.getBorderStation = function (busGroupId) {
-        busGroupId = (busGroupId || "").trim().toUpperCase();
-
-        if (busGroupId === "11") return "border-pink-2";
-        if (busGroupId === "21") return "border-orange-2";
-        if (busGroupId === "31") return "border-green-2";
-
-        return "";
-      };
-
-      $scope.getVerticalClass = function (route_name) {
-        const name = (route_name || "").trim().toUpperCase();
-        if (name === "EXPRESS") return "vertical-connector-pink";
-        if (name === "B LINE") return "vertical-connector-orange";
-        if (name === "F LINE") return "vertical-connector-green";
-
-        return "";
-      };
-
-      $scope.getBusClass = function (route_name) {
-        const name = (route_name || "").trim().toUpperCase();
-
-        if (name === "EXPRESS") return "bus-wrapper-pink";
-        if (name === "B LINE") return "bus-wrapper-orange";
-        if (name === "F LINE") return "bus-wrapper-green";
-
-        return "";
-      };
-
-      $scope.getDotColorClass = function (route_name) {
-        const name = (route_name || "").trim().toUpperCase();
-
-        if (name === "EXPRESS") return "dot-pink";
-        if (name === "B LINE") return "dot-orange";
-        if (name === "F LINE") return "dot-green";
-
-        return "";
-      };
-
-      $scope.getLastBusStopOrder = function (route) {
-        let lastOrder = 0;
-        route.stops.forEach((stop) => {
-          const isInPassing =
-            stop.passing_bus_numbers &&
-            stop.passing_bus_numbers.includes($scope.selectedBusNumber);
-          const isInTransit =
-            stop.buses_in_transit_to_next_stop &&
-            stop.buses_in_transit_to_next_stop.includes(
-              $scope.selectedBusNumber
-            );
-
-          if (isInPassing || isInTransit) {
-            if (stop.stop_order > lastOrder) {
-              lastOrder = stop.stop_order;
-            }
-          }
-        });
-        return lastOrder;
-      };
-
-      $scope.isPassedStation = function (stop, route) {
-        const lastOrder = $scope.getLastBusStopOrder(route);
-        return stop.stop_order <= lastOrder;
-      };
-
-      $scope.getBorderStep3_Station = function (route, stop) {
-        if ($scope.isPassedStation(stop, route)) {
-          return "border-gray-2";
-        }
-
-        const name = (route.route_name || "").trim().toUpperCase();
-
-        if (name === "EXPRESS") return "border-pink-2";
-        if (name === "B LINE") return "border-orange-2";
-        if (name === "F LINE") return "border-green-2";
-
-        return "";
-      };
-
-      $scope.getConnectorClass = function (route, stopIndex) {
-        const stops = route.stops;
-
-        const currentStop = stops[stopIndex];
-        const nextStop = stops[stopIndex + 1];
-
-        const passedCurrent = $scope.isPassedStation(currentStop, route);
-        const passedNext = $scope.isPassedStation(nextStop, route);
-
-        if (passedCurrent && passedNext) {
-          return "vertical-connector-gray";
-        }
-
-        const name = (route.route_name || "").trim().toUpperCase();
-        if (name === "EXPRESS") return "vertical-connector-pink";
-        if (name === "B LINE") return "vertical-connector-orange";
-        if (name === "F LINE") return "vertical-connector-green";
-
-        return "";
-      };
-
+      // --- Modal ---
       $scope.modalBusList = [];
-      $scope.togglePopup = function ($event, stop, route, isTransit) {
+      $scope.togglePopup = function ($event, stations, busLines, isTransit) {
         $event.stopPropagation();
-
         $scope.modalBusList = isTransit
-          ? stop.buses_in_transit_to_next_stop
-          : stop.passing_bus_numbers;
-
-        BusSelectionService.setStop(stop);
-        BusSelectionService.setRoute(route);
+          ? stations.buses_in_transit_to_next_stop
+          : stations.passing_bus_numbers;
+        BusSelectionService.setStation(stations);
+        BusSelectionService.setBusLine(busLines);
         BusSelectionService.setTransitMode(!!isTransit);
-        BusSelectionService.setShowModal(true); // <-- บันทึก state modal
-
+        BusSelectionService.setShowModal(true);
         $scope.showBusSelectionModal = true;
       };
-
       $scope.selectBus = function (bus) {
         BusSelectionService.setBusNumber(bus);
       };
-
       $scope.confirmSelection = function () {
         const selected = BusSelectionService.getSelectedData();
         if (selected.busNumber) {
           $scope.showBusSelectionModal = false;
-          $scope.step = 3; // ไป step 3
+          $scope.step = 3;
+          $scope.selectedBusNumber = selected.busNumber;
+          $rootScope.$broadcast("clearMap");
+
+          if ($scope.selectedRoute && $scope.selectedRoute.busLineId) {
+            $scope
+              .loadBusLineAndCurrent($scope.selectedRoute.busLineId)
+              .then(() => {
+                if (
+                  $scope.selectedRoute &&
+                  Array.isArray($scope.selectedRoute.busLineStations)
+                ) {
+                  $rootScope.$broadcast("showBus", $scope.selectedBusNumber);
+                } else {
+                  console.warn("❌ ไม่มีข้อมูลสถานีใน selectedRoute");
+                }
+              });
+          }
         } else {
           alert("กรุณาเลือกรถก่อนกดยืนยัน");
         }
@@ -427,7 +350,53 @@ angular
 
       $scope.closeBusSelectionModal = function () {
         $scope.showBusSelectionModal = false;
-        BusSelectionService.setShowModal(false); // <-- ปิด modal จาก service
+        BusSelectionService.setShowModal(false);
+      };
+
+      // --- Class Helpers ---
+      const busClassMap = {
+        11: "pink",
+        21: "orange",
+        31: "green",
+      };
+
+      $scope.getBorderClass = (id) =>
+        busClassMap[id?.trim()] ? `border-${busClassMap[id]}` : "border-gray";
+      $scope.getBorderStation = (id) =>
+        busClassMap[id?.trim()] ? `border-${busClassMap[id]}-2` : "";
+      $scope.getVerticalClass = (id) =>
+        busClassMap[id?.trim()] ? `vertical-connector-${busClassMap[id]}` : "";
+      $scope.getBusClass = (id) =>
+        busClassMap[id?.trim()] ? `bus-wrapper-${busClassMap[id]}` : "";
+      $scope.getDotColorClass = (id) =>
+        busClassMap[id?.trim()] ? `dot-${busClassMap[id]}` : "";
+      $scope.getBorderStep3_Station = (id) =>
+        busClassMap[id?.trim()] ? `border-${busClassMap[id]}-2` : "";
+      $scope.getModalClass = (id) =>
+        busClassMap[id?.trim()] ? `modal-body-${busClassMap[id]}` : "";
+      $scope.getModalSelectClass = (id) =>
+        busClassMap[id?.trim()] ? `bus-select-btn-${busClassMap[id]}` : "";
+      $scope.getModalButtonClass = (id) =>
+        busClassMap[id?.trim()] ? `button-modal-${busClassMap[id]}` : "";
+
+      $scope.getConnectorClass = function (route) {
+        // ป้องกัน error passedCurrent undefined
+        var passedCurrent = route && route.passedCurrent ? true : false;
+        var passedNext = route && route.passedNext ? true : false;
+
+        if (passedCurrent && passedNext) {
+          return "vertical-connector-gray";
+        }
+
+        var busGroupId = (route && route.busGroupId ? route.busGroupId : "")
+          .trim()
+          .toUpperCase();
+
+        if (busGroupId === "11") return "vertical-connector-pink";
+        if (busGroupId === "21") return "vertical-connector-orange";
+        if (busGroupId === "31") return "vertical-connector-green";
+
+        return "";
       };
     }
   );

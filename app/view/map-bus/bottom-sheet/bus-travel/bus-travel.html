@@ -19,7 +19,7 @@
     <div class="font-SL m-l-12 m-t-10">เส้นทางทั้งหมด</div>
 
     <md-list-item
-      ng-repeat="busLine in busLines"
+      ng-repeat="busLine in busLines track by busLine.busLineId"
       ng-click="goToStep(2, busLine.busLineId)"
     >
       <div class="station-flex">
@@ -37,7 +37,7 @@
           <div class="destination-info">
             <div class="font-gray">ปลายทาง</div>
             <div class="font-SL">
-              {{ getStationName(route.destination_station_id) }}
+              {{ busLine.endLocationName || 'ไม่พบข้อมูลปลายทาง' }}
             </div>
           </div>
         </div>
@@ -68,34 +68,30 @@
           class="station-box station-display"
           ng-class="getBorderClass(selectedRoute.busGroupId)"
         >
-          <img
-            ng-if="selectedRoute.route_name === 'EXPRESS'"
+          <!-- <img
             src="app/assets/icon/bus-simple.svg"
             class="bus-img"
             alt="bus"
-          />
+          /> -->
           {{ selectedRoute.busLineName }}
         </div>
 
         <div
-          ng-repeat="stop in selectedRoute.stops"
+          ng-repeat="station in selectedRoute.busLineStations"
           class="station-stop mt-20"
           style="position: relative"
         >
           <div class="column-left">
-            <!-- กรณีมี busNumber มากกว่า 1 -->
+            <!-- กรณีมี busNumber มากกว่า 1  -->
             <div
               class="bus-wrapper"
-              ng-class="getBusClass(selectedRoute.route_name)"
-              ng-if="stop.passing_bus_numbers.length > 1"
-              ng-click="togglePopup($event, stop, selectedRoute)"
+              ng-class="getBusClass(selectedRoute.busGroupId)"
+              ng-if="station.passing_bus_numbers.length > 1"
+              ng-click="togglePopup($event, station, selectedRoute)"
               style="cursor: pointer; position: relative"
             >
-              <span
-                class="bus-number-in-rect"
-                ng-repeat="busNumber in stop.passing_bus_numbers"
-              >
-                {{ busNumber }}
+              <span class="bus-number-in-rect">
+                {{ station.passing_bus_numbers.length }} คัน
               </span>
               <img
                 src="app/assets/icon/bus-simple.svg"
@@ -104,16 +100,16 @@
               />
             </div>
 
-            <!-- กรณีมี busNumber เดียว -->
+            <!-- กรณีมี busNumber เดียว  -->
             <div
               class="bus-wrapper"
-              ng-class="getBusClass(selectedRoute.route_name)"
-              ng-if="stop.passing_bus_numbers.length === 1"
-              ng-click="goToStep(3, selectedRoute, stop.passing_bus_numbers[0])"
+              ng-class="getBusClass(selectedRoute.busGroupId)"
+              ng-if="station.passing_bus_numbers.length === 1"
+              ng-click="goToStep(3, selectedRoute.busLineId, station.passing_bus_numbers[0])"
               style="cursor: pointer"
             >
               <span class="bus-number-in-rect">
-                {{ stop.passing_bus_numbers[0] }}
+                {{ station.passing_bus_numbers[0] }}
               </span>
               <img
                 src="app/assets/icon/bus-simple.svg"
@@ -127,45 +123,43 @@
             <div class="station-number-column">
               <div
                 class="number-circle"
-                ng-class="getBorderStation(selectedRoute.route_name)"
+                ng-class="getBorderStation(selectedRoute.busGroupId)"
                 style="z-index: 2; position: relative"
               >
-                {{ $index + 1 }}
+                {{ station.no}}
 
                 <div
                   ng-if="!$last"
                   class="vertical-connector"
                   ng-class="[
-    getVerticalClass(selectedRoute.route_name),
-    stop.buses_in_transit_to_next_stop.length > 0 ? 'has-bus-in-transit' : ''
-  ]"
+            getVerticalClass(selectedRoute.busGroupId),
+            station.buses_in_transit_to_next_stop.length > 0 ? 'has-bus-in-transit' : ''
+          ]"
                 >
                   <div
                     class="bus-in-transit-dot"
-                    ng-if="stop.buses_in_transit_to_next_stop.length > 0"
-                    ng-class="getDotColorClass(selectedRoute.route_name)"
+                    ng-if="station.buses_in_transit_to_next_stop.length > 0"
+                    ng-class="getDotColorClass(selectedRoute.busGroupId)"
                   >
-                    <!-- แสดง buses_in_transit_to_next_stop กึ่งกลางเส้น -->
                     <div class="station-stop" style="position: relative">
                       <div
                         class="column-left"
-                        ng-if="stop.buses_in_transit_to_next_stop && stop.buses_in_transit_to_next_stop.length > 0"
+                        ng-if="station.buses_in_transit_to_next_stop && station.buses_in_transit_to_next_stop.length > 0"
                       >
-                        <!-- วางใน .column-left -->
                         <div
                           class="bus-in-transit-floating"
-                          ng-if="!$last && stop.buses_in_transit_to_next_stop.length > 0"
+                          ng-if="!$last && station.buses_in_transit_to_next_stop.length > 0"
                         >
                           <div
                             class="bus-wrapper"
-                            ng-class="getBusClass(selectedRoute.route_name)"
-                            ng-if="stop.buses_in_transit_to_next_stop.length > 1"
-                            ng-click="togglePopup($event, stop, selectedRoute, true)"
+                            ng-class="getBusClass(selectedRoute.busGroupId)"
+                            ng-if="station.buses_in_transit_to_next_stop.length > 1"
+                            ng-click="togglePopup($event, station, selectedRoute, true)"
                             style="cursor: pointer"
                           >
                             <span
                               class="bus-number-in-rect"
-                              ng-repeat="busNumber in stop.buses_in_transit_to_next_stop"
+                              ng-repeat="busNumber in station.buses_in_transit_to_next_stop"
                             >
                               {{ busNumber }}
                             </span>
@@ -178,13 +172,13 @@
 
                           <div
                             class="bus-wrapper"
-                            ng-class="getBusClass(selectedRoute.route_name)"
-                            ng-if="stop.buses_in_transit_to_next_stop.length === 1"
-                            ng-click="goToStep(3, selectedRoute, stop.buses_in_transit_to_next_stop[0])"
+                            ng-class="getBusClass(selectedRoute.busGroupId)"
+                            ng-if="station.buses_in_transit_to_next_stop.length === 1"
+                            ng-click="goToStep(3, selectedRoute.busLineId, station.buses_in_transit_to_next_stop[0])"
                             style="cursor: pointer"
                           >
                             <span class="bus-number-in-rect">
-                              {{ stop.buses_in_transit_to_next_stop[0] }}
+                              {{ station.buses_in_transit_to_next_stop[0] }}
                             </span>
                             <img
                               src="app/assets/icon/bus-simple.svg"
@@ -201,7 +195,7 @@
             </div>
 
             <div class="mt-1 station-name-aligned">
-              {{ getStationName(stop.station_id) }}
+              {{ station.locationName}}
             </div>
           </div>
         </div>
@@ -220,23 +214,36 @@
   >
     <div class="modal-header">
       <button class="modal-close-arrow" ng-click="closeBusSelectionModal()">
-        <img class="close-arrow-icon" src="app/assets/icon/arrow-left-solid.svg" alt="close-arrow-icon">
+        <img
+          class="close-arrow-icon"
+          src="app/assets/icon/arrow-left-solid.svg"
+          alt="close-arrow-icon"
+        />
       </button>
       <span class="modal-title">เลือกสายรถ</span>
     </div>
 
     <div class="modal-botton-line"></div>
 
-    <div class="modal-body">
+    <div class="modal-body" ng-class="getModalClass(selectedRoute.busGroupId)">
       <div class="bus-option" ng-repeat="bus in modalBusList">
-        <button class="btn bus-select-btn" ng-click="selectBus(bus)">
+        <button
+          class="bus-select-btn"
+          ng-click="selectBus(bus)"
+          ng-class="getModalSelectClass(selectedRoute.busGroupId)"
+        >
           {{ bus }}
         </button>
       </div>
     </div>
 
     <div class="modal-footer">
-      <button class="btn btn-primary w-100" style="border-radius: 16px;" ng-click="confirmSelection()">
+      <button
+        class="button-modal"
+        style="border-radius: 16px"
+        ng-click="confirmSelection()"
+        ng-class="getModalButtonClass(selectedRoute.busGroupId)"
+      >
         ยืนยัน
       </button>
     </div>
@@ -266,17 +273,17 @@
         <div class="font-xl mt-2">เส้นทางการเดินรถ</div>
 
         <div
-          ng-repeat="stop in selectedRoute.stops"
+          ng-repeat="station in selectedRoute.busLineStations"
           class="station-stop mt-20"
           style="position: relative"
         >
           <div class="column-left">
             <div
               class="bus-wrapper"
-              ng-class="getBusClass(selectedRoute.route_name)"
-              ng-if="stop.passing_bus_numbers.indexOf(selectedBusNumber) !== -1"
+              ng-class="getBusClass(selectedRoute.busGroupId)"
+              ng-if="station.passing_bus_numbers.indexOf(selectedBusNumber) !== -1"
             >
-              <span class="bus-number-in-rect"> {{ selectedBusNumber }} </span>
+              <span class="bus-number-in-rect">{{ selectedBusNumber }}</span>
               <img
                 src="app/assets/icon/bus-simple.svg"
                 class="bus-img"
@@ -289,11 +296,10 @@
             <div class="station-number-column">
               <div
                 class="number-circle"
-                ng-class="getBorderStep3_Station(selectedRoute, stop)"
+                ng-class="getBorderStep3_Station(selectedRoute.busGroupId)"
                 style="z-index: 2; position: relative"
               >
-                {{ $index + 1 }}
-
+                {{ station.no}}
                 <div
                   ng-if="!$last"
                   class="vertical-connector"
@@ -301,15 +307,15 @@
                 >
                   <div
                     class="bus-in-transit-dot"
-                    ng-if="stop.buses_in_transit_to_next_stop.length > 0"
-                    ng-class="getDotColorClass(selectedRoute.route_name)"
+                    ng-if="station.buses_in_transit_to_next_stop.length > 0"
+                    ng-class="getDotColorClass(selectedRoute.busGroupId)"
                   >
                     <div class="column-left">
                       <div class="bus-in-transit-floating">
                         <div
                           class="bus-wrapper"
-                          ng-class="getBusClass(selectedRoute.route_name)"
-                          ng-if="stop.buses_in_transit_to_next_stop.indexOf(selectedBusNumber) !== -1"
+                          ng-class="getBusClass(selectedRoute.busGroupId)"
+                          ng-if="station.buses_in_transit_to_next_stop.indexOf(selectedBusNumber) !== -1"
                         >
                           <span class="bus-number-in-rect">
                             {{ selectedBusNumber }}
@@ -328,7 +334,7 @@
             </div>
 
             <div class="mt-1 station-name-aligned">
-              {{ getStationName(stop.station_id) }}
+              {{ station.locationName}}
             </div>
           </div>
         </div>
