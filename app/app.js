@@ -10,6 +10,7 @@ var app = angular.module("myApp", [
 angular.module('myApp')
   .config(function($mdGestureProvider) {
     $mdGestureProvider.skipClickHijack(); // ✅ เปิดไว้
+    
   });
 
 app.run(function ($rootScope, AuthenService) {

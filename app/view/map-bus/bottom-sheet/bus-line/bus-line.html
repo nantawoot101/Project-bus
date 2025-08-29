@@ -4,10 +4,11 @@
 />
 <div  >
   <md-bottom-sheet
+    ng-if="step === 1"
     class="bus-line-sheet"
     id="buslineSheet"
     ng-class="{ expanded: isExpanded }"
-    ng-style="{ overflowY: isExpanded ? 'auto' : 'hidden' }"
+    ng-style="{ height: sheetHeightVH + 'vh', overflowY: isExpanded ? 'auto' : 'hidden' }"
     
   >
     <div
@@ -15,14 +16,14 @@
       ng-mousedown="buslineStartDrag($event)"
       ontouchstart="buslineStartDrag(event)"
     ></div>
-    <div class="font-SL m-l-12 m-t-10">รถที่ผ่าน</div>
+    <div class="font-SXL m-l-12 m-t-10">รถที่ผ่าน</div>
 
-   <md-list-item ng-repeat="route in busStations | orderBy:'arrival_time'">
-  <div class="bus-flex">
+   <md-list-item ng-repeat="route in busStations" >
+  <div class="bus-flex" ng-click="goToStep(2, route.boxId)">
     <div class="bus-box-container">
-      <div class="bus-station-box" ng-class="getBusVerticalClass(route.route_id)">
-        <div class="font-SXL">{{ route.bus_number }}</div>
-        <div class="font-SS" style="margin-top: 2px">{{ route.route_id }}</div>
+      <div class="bus-station-box" ng-class="getBusVerticalClass(route.groupBusLineId)">
+        <div class="font-SXL">{{ route.vehicleName }}</div>
+        <div class="font-SS text-break" style="margin-top: 2px">{{ route.groupBusLineName }}</div>
       </div>
     </div>
 
@@ -31,20 +32,53 @@
         <div class="">
           <div class="box-bus">
             <img src="app/assets/icon/bus-simple.svg" alt="bus-simple" width="14px" height="14px">
-            {{route.license_plate}}
+            {{route.plateNo}}
           </div>
 
           <div class="m-t-10">
             <img src="app/assets/icon/reply_all_right.svg" alt="" width="20px" height="20px">
-            {{ getStationNameById(route.current_station_id) }}
+            {{ route.currentStationName || 'ไม่ระบุ' }}
           </div>
         </div>
       </div>
     </div>
 
-    <div class="arrival_time">{{ route.arrival_time | date:'HH:mm'  }}</div>
+    <div class="arrival_time">{{ route.estimateTime | date:'HH:mm' }}</div>
   </div>
 </md-list-item>
 
   </md-bottom-sheet>
+
+
+    <md-bottom-sheet
+    ng-if="step === 2"
+    class="bus-line-sheet"
+    id="buslineSheet"
+    ng-class="{ expanded: isExpanded }"
+    ng-style="{ height: sheetHeightVH + 'vh', overflowY: isExpanded ? 'auto' : 'hidden' }"
+
+  >
+    <div
+      class="drag-handle-two"
+      ng-mousedown="buslineStartDrag($event)"
+      ontouchstart="buslineStartDrag(event)"
+    ></div>
+    <div class="font-SL m-l-12 m-t-10"></div>
+
+    <button class="close-btn-tab" ng-click="goBackToStep1()" aria-label="ปิด">
+      &times;
+    </button>
+
+   <md-list-item ng-repeat="route in selectedBus | orderBy:'arrival_time'">
+
+      <div class="bus-station-box" ng-class="getBusVerticalClass(route.groupBusLineId)">
+        <div class="font-SXL">{{ route.vehicleName }}</div>
+        <div class="font-SS text-break" style="margin-top: 2px">{{ route.groupBusLineName }}</div>
+      </div>
+
+  </md-list-item>
+
+  </md-bottom-sheet>
+
+
 </div>

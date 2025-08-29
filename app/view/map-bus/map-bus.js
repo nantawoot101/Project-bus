@@ -7,7 +7,6 @@ app.controller(
     $state,
     $window,
     $http,
-    BusSelectionService,
     BusLineService
   ) {
     $scope.step = 1;
@@ -15,23 +14,6 @@ app.controller(
     $scope.routeControl = null;
     $scope.mapStations = [];
     $scope.busMarkers = [];
-
-    // ตัวจัดการซ่อนตข้อมูลบางส่วน เมื่อ modal ถูกเปิดขึ้น
-    const selectedData = BusSelectionService.getSelectedData();
-    $scope.showBusSelectionModal = selectedData.showBusSelectionModal;
-
-    $scope.$watch(
-      function () {
-        return BusSelectionService.getSelectedData().showBusSelectionModal;
-      },
-      function (newVal) {
-        $scope.showBusSelectionModal = newVal;
-
-        if (newVal) {
-          $scope.selectedBusData = BusSelectionService.getSelectedData();
-        }
-      }
-    );
 
     //===============================================================================
 
@@ -63,6 +45,7 @@ app.controller(
       $scope.map = map;
       $rootScope.leafletMap = map;
 
+      // ส่วนที่ใช้สำหรับแสดงตำแหน่ง GPS ของผู้ใช้
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           function (position) {
@@ -99,6 +82,8 @@ app.controller(
           }
         );
       }
+
+      // ส่วนที่ ดึงข้อมูล location จากหน้า Search มาแสดงบนแผนที่
 
       const startStationIcon = L.divIcon({
         className: "",
@@ -173,6 +158,7 @@ app.controller(
               { color: "#9ce8e2", weight: 5, opacity: 1 },
             ],
           },
+
           createMarker: () => null,
           routeWhileDragging: false,
           addWaypoints: false,
@@ -180,6 +166,8 @@ app.controller(
           show: false,
         }).addTo(map);
       }
+
+      // ส่วนที่ใช้สำหรับแสดงเส้นทางและสถานีรถบัส บนแผนที่ ที่ทำงานร่วมกันกับ bus-travel
 
       $rootScope.$on("routeSelected", function (event, busLine) {
         if (!busLine || !busLine.busLineId) {
@@ -239,7 +227,8 @@ app.controller(
           $scope.routingControl = null;
         }
 
-        // **ลบการกำหนด busGroupId ใหม่ที่นี่**
+        // ✅ จัดการตำแหน่งซ้ำ
+        const existingCoords = new Set();
 
         stations.forEach((station) => {
           if (
@@ -248,16 +237,31 @@ app.controller(
             !isNaN(station.latitude) &&
             !isNaN(station.longitude)
           ) {
-            const marker = L.marker([station.latitude, station.longitude], {
+            let lat = parseFloat(station.latitude);
+            let lng = parseFloat(station.longitude);
+            let key = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+            let offsetIndex = 0;
+
+            // ถ้ามีตำแหน่งซ้ำ ปรับ offset
+            while (existingCoords.has(key)) {
+              offsetIndex++;
+              lat = parseFloat(station.latitude) + offsetIndex * 0.00005;
+              lng = parseFloat(station.longitude) + offsetIndex * 0.00005;
+              key = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+            }
+
+            existingCoords.add(key);
+
+            const marker = L.marker([lat, lng], {
               icon: L.divIcon({
                 className: "",
                 html: `
-            <div style="display: flex; flex-direction: column; align-items: center;">
-              <div class='station-marker' style="color: white;">${station.no}</div>
-              <div class='station-name' style="font-size: 12px; margin-top: 2px; text-align: center; max-width: 80px;">
-                ${station.locationName}
-              </div>
-            </div>`,
+          <div style="display: flex; flex-direction: column; align-items: center;">
+            <div class='station-marker' style="color: white;">${station.no}</div>
+            <div class='station-name' style="font-size: 12px; margin-top: 2px; text-align: center; max-width: 80px;">
+              ${station.locationName}
+            </div>
+          </div>`,
                 iconSize: [30, 52],
                 iconAnchor: [15, 52],
               }),
@@ -327,6 +331,7 @@ app.controller(
               ],
             },
             createMarker: () => null,
+            serviceUrl: "",
             routeWhileDragging: false,
             addWaypoints: false,
             show: false,
@@ -334,24 +339,20 @@ app.controller(
         }
       }
 
-      // 📌 รับคำสั่งให้แสดงรถบัส
+      $rootScope.$on("showBus", function (event, busNumber, updateOnly) {
+        $scope.drawBusAndRoute(busNumber, updateOnly);
+      });
 
-      $rootScope.$on("showBus", function (event, busNumber) {
+      $scope.drawBusAndRoute = function (busNumber, updateOnly = false) {
         if (!$scope.selectedRoute || !busNumber) return;
 
-        // ลบ marker รถบัสเก่า
+        // ✅ ลบ marker รถบัสเก่า
         if ($scope.busMarker) {
           $rootScope.leafletMap.removeLayer($scope.busMarker);
           $scope.busMarker = null;
         }
 
-        // ลบ routing control เก่า (เส้นทาง)
-        if ($scope.busRoutingControl) {
-          $rootScope.leafletMap.removeControl($scope.busRoutingControl);
-          $scope.busRoutingControl = null;
-        }
-
-        // ลบ marker สถานีเก่า
+        // ✅ ลบ marker สถานีเก่า
         if ($scope.busStationMarkers && $scope.busStationMarkers.length > 0) {
           $scope.busStationMarkers.forEach((m) =>
             $rootScope.leafletMap.removeLayer(m)
@@ -384,9 +385,12 @@ app.controller(
           return;
         }
 
-        // สร้าง marker รถบัส
+        // ✅ Marker รถบัส
         $scope.busMarker = L.marker(
-          [currentStation.latitude, currentStation.longitude],
+          [
+            parseFloat(currentStation.latitude),
+            parseFloat(currentStation.longitude),
+          ],
           {
             icon: L.icon({
               iconUrl: "app/assets/img/bus.png",
@@ -396,7 +400,9 @@ app.controller(
           }
         ).addTo($rootScope.leafletMap);
 
-        // สร้าง marker สถานีตามสถานะ (ผ่าน, ปัจจุบัน, ยังไม่ถึง)
+        const existingCoords = new Set();
+
+        // ✅ Marker สถานี
         routeStations.forEach((station, index) => {
           const isPassed = index < currentStopIndex;
           const isCurrent = index === currentStopIndex;
@@ -404,27 +410,35 @@ app.controller(
           let markerHtml;
           if (isPassed || isCurrent) {
             markerHtml = `
-        <div style="display: flex; flex-direction: column; align-items: center;">
-          <div class='station-marker-gray'>
-            ${station.no}
-          </div>
-          <div class='station-name' style="font-size: 12px; margin-top: 2px; text-align: center; max-width: 80px;">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div class='station-marker-gray'>${station.no}</div>
+          <div class='station-name' style="font-size:12px;margin-top:2px;text-align:center;max-width:80px;">
             ${station.locationName}
           </div>
         </div>`;
           } else {
             markerHtml = `
-        <div style="display: flex; flex-direction: column; align-items: center;">
-          <div class='station-marker' style="color: white;">
-            ${station.no}
-          </div>
-          <div class='station-name' style="font-size: 12px; margin-top: 2px; text-align: center; max-width: 80px;">
-            ${station.locationName}
-          </div>
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div class='station-marker' style="color:white;">${station.no}</div>
+          <div class='station-name'>${station.locationName}</div>
         </div>`;
           }
 
-          const marker = L.marker([station.latitude, station.longitude], {
+          let lat = parseFloat(station.latitude);
+          let lng = parseFloat(station.longitude);
+          let key = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+          let offsetIndex = 0;
+
+          while (existingCoords.has(key)) {
+            offsetIndex++;
+            lat = parseFloat(station.latitude) + offsetIndex * 0.00005;
+            lng = parseFloat(station.longitude) + offsetIndex * 0.00005;
+            key = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+          }
+
+          existingCoords.add(key);
+
+          const marker = L.marker([lat, lng], {
             icon: L.divIcon({
               className: "",
               html: markerHtml,
@@ -437,7 +451,10 @@ app.controller(
           $scope.busStationMarkers.push(marker);
         });
 
-        // ฟังก์ชันกำหนดสีเส้นตามชื่อเส้นทาง
+        // ✅ ถ้า updateOnly ให้จบตรงนี้ (ไม่สร้างเส้นทางใหม่)
+        if (updateOnly) return;
+
+        // ✅ ฟังก์ชันเลือกสีเส้นทางตาม busGroupId
         function getColorByRouteName2(busGroupId) {
           switch ((busGroupId || "").trim().toUpperCase()) {
             case "11":
@@ -463,7 +480,7 @@ app.controller(
           }
         }
 
-        // ลบเส้นทางเก่า (ถ้ามี)
+        // ✅ ลบเส้นทางเก่า
         if ($scope.busRouteLines && $scope.busRouteLines.length > 0) {
           $scope.busRouteLines.forEach((line) => {
             if ($rootScope.leafletMap.hasLayer(line)) {
@@ -478,12 +495,11 @@ app.controller(
           $scope.busRouteLines = [];
         }
 
-        // สร้าง waypoints ทั้งหมดจากสถานี
+        // ✅ สร้าง routing control ครั้งแรกเท่านั้น
         const waypoints = routeStations.map((s) =>
-          L.latLng(s.latitude, s.longitude)
+          L.latLng(parseFloat(s.latitude), parseFloat(s.longitude))
         );
 
-        // สร้าง routing control เส้นเดียวต่อเนื่อง
         const routingControl = L.Routing.control({
           waypoints: waypoints,
           router: L.Routing.osrmv1({
@@ -512,7 +528,7 @@ app.controller(
         }).addTo($rootScope.leafletMap);
 
         $scope.busRouteLines.push(routingControl);
-      });
+      };
 
       //ตัวเคลียร์เส้นทาง สถานี และ รถบัส
       $rootScope.$on("clearBusMap", function () {
@@ -596,6 +612,9 @@ app.controller(
       $rootScope.selectedStartlocation = $scope.selectedStartlocation;
       $rootScope.selectedEndlocation = $scope.selectedEndlocation;
 
+      // แจ้งให้ bus-line รีเฟรชข้อมูล busStations หลังสลับสถานี
+      $rootScope.$broadcast("swapStations");
+
       // รีเฟรช marker และเส้นทางบนแผนที่
       $timeout(function () {
         if (gpsLayer) {
@@ -677,6 +696,7 @@ app.controller(
               ],
             },
             createMarker: () => null,
+            serviceUrl: "",
             routeWhileDragging: false,
             addWaypoints: false,
             draggableWaypoints: false,
@@ -684,6 +704,43 @@ app.controller(
           }).addTo($scope.map);
         }
       }, 0);
+    };
+
+    $scope.showMapBusButtons = true;
+
+    $rootScope.$on("hideMapBusButtons", function () {
+      $scope.showMapBusButtons = false;
+    });
+    $rootScope.$on("showMapBusButtons", function () {
+      $scope.showMapBusButtons = true;
+    });
+
+    $scope.Current_Position = function () {
+      if (
+        $scope.lastGpsLat != null &&
+        $scope.lastGpsLng != null &&
+        $scope.map
+      ) {
+        $scope.map.setView([$scope.lastGpsLat, $scope.lastGpsLng], 16);
+      } else {
+        // ถ้าไม่มีตำแหน่งล่าสุด ให้ขอใหม่
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            function (position) {
+              const lat = position.coords.latitude;
+              const lng = position.coords.longitude;
+              $scope.lastGpsLat = lat;
+              $scope.lastGpsLng = lng;
+              if ($scope.map) {
+                $scope.map.setView([lat, lng], 16);
+              }
+            },
+            function (error) {
+              alert("ไม่สามารถดึงตำแหน่ง GPS ได้");
+            }
+          );
+        }
+      }
     };
   }
 );

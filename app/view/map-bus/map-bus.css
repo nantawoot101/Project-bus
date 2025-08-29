@@ -64,11 +64,13 @@
   display: flex;
   align-items: center;
   border: none;
+  width: 41px;
+  height: 41px;
 }
 
 .search-icon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   background-size: cover;
   filter: brightness(0) saturate(100%) invert(50%) sepia(0%) saturate(0%)
     hue-rotate(180deg) brightness(90%) contrast(90%);
@@ -187,6 +189,7 @@
   width: 30px;
   height: 30px;
   background-color: #9e39c9;
+  color: white;
   position: relative;
   border-radius: 50%;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
@@ -222,11 +225,12 @@
 
 .station-name {
   font-size: 12px;
+  font-weight: bold;
   color: #333;
-  background: rgba(255, 255, 255, 0.6); /* พื้นหลังขาวโปร่งใส */
+  background: rgba(252, 252, 252, 0.4); /* พื้นหลังขาวโปร่งใส */
   padding: 2px 6px;
   border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   margin-top: 4px;
   max-width: 400px;
   min-width: 200px;

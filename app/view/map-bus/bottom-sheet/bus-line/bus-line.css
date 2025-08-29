@@ -10,9 +10,12 @@
   overflow-y: auto;
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
-  height: 30vh;
-  will-change: height;
+  height: 30vh; /* ความสูงเริ่มต้น */
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
+
+.bus-line-sheet::-webkit-scrollbar {
+  display: none;
 }
 
 .font-SS {
@@ -21,7 +24,7 @@
 }
 
 .font-SXL {
-  font-size: 36px;
+  font-size: 24px;
   font-weight: bold;
 }
 
@@ -34,13 +37,16 @@
 }
 
 .drag-handle-two {
-  width: 40px;
+  position: sticky;
+  top: 0; /* ติดด้านบน */
+  width: 50px;
   height: 6px;
-  background-color: #ccc;
-  border-radius: 3px;
-  margin: 8px auto;
-  cursor: grab;
-  touch-action: none;
+  background: #ccc;
+  border-radius: 4px;
+  z-index: 1000;
+  margin: 0 auto;
+  display: block;
+  touch-action: none; 
 }
 
 .bus-connector-pink {
@@ -160,4 +166,25 @@
 .arrow-up-down{
   background: none;
   border: none;
+}
+
+
+.close-btn-tab {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: #e0e0e0;
+  border: none;
+  font-size: 16px;
+  color: #555;
+  cursor: pointer;
+  z-index: 10;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
 }

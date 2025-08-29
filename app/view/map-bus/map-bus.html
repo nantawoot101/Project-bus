@@ -6,7 +6,7 @@
 
     <!-- สเต็ป 1: ปกติ -->
     <div ng-if="step === 1 ">
-      <button class="search-box" ng-cloak ng-click="goToSearch('end')" ng-show="!showBusSelectionModal">
+      <button class="search-box" ng-cloak ng-click="goToSearch('end')" ng-show="showMapBusButtons">
         <img src="app/assets/icon/search.svg" alt="search" class="search-icon" ng-cloak/>
       </button>
 
@@ -51,7 +51,7 @@
       </div>
     </div>
 
-    <button class="coser_blue" id="gpsButton" ng-click="Current_Position()" ng-show="!showBusSelectionModal">
+    <button class="coser_blue" id="gpsButton" ng-click="Current_Position()" ng-show="showMapBusButtons">
       <img class="coser_blue-icon" src="app/assets/icon/location-arrow.svg" alt="" />
     </button>
   </div>

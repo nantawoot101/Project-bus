@@ -11,7 +11,6 @@ angular
       LocationService.getLocations()
         .then(function (response) {
           $scope.locations = response.data;
-          console.log("ข้อมูลสถานที่:", $scope.locations);
         })
         .catch(function (error) {
           console.error("Error loading locations:", error);
@@ -25,9 +24,17 @@ angular
           return;
         }
 
-        $scope.filteredLocations = $scope.locations.filter(function (location) {
-          return location.locationName.toLowerCase().includes(keyword);
-        });
+        $scope.filteredLocations = $scope.locations
+          .filter(function (location) {
+            // รองรับตัวอักษรไทยและอังกฤษ
+            return (location.locationName || "")
+              .toLowerCase()
+              .includes(keyword);
+          })
+          .sort(function (a, b) {
+            // เรียงตามอักษรไทย (ใช้ localeCompare)
+            return (a.locationName || "").localeCompare(b.locationName || "", 'th');
+          });
       };
 
       // เคลียร์ช่องค้นหา
