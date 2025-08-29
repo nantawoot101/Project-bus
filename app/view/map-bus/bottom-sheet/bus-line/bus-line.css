@@ -102,7 +102,7 @@
 }
 
 .bus-station-box {
-  min-width: 70px;
+  width: 120px;
   height: auto; /* ปรับให้สูงตามเนื้อหา */
   padding: 5px 8px;
   border-radius: 10px;
@@ -112,12 +112,14 @@
   flex-direction: column; 
   justify-content: center;
   align-items: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+
+  white-space: normal; /* อนุญาตให้ขึ้นบรรทัดใหม่ */
+  overflow-wrap: break-word; /* ตัดคำถ้ายาวเกิน */
+  word-break: break-word;    /* รองรับคำยาวแบบไม่เว้นวรรค */
   text-align: center;
   line-height: 1.2; 
 }
+
 
 
 .bus-destination-info {

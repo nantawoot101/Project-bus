@@ -39,23 +39,26 @@ angular
 
               // merge เฉพาะรถที่ boxId ตรงกัน
               var mergedBuses = busIncoming.map(function (incomingBus) {
-                // หา match ใน current
                 var match = currentBuses.find(
                   (currentBus) => currentBus.boxId === incomingBus.boxId
                 );
 
-                // ถ้ามี match เอาข้อมูล current มา merge
-                return match
-                  ? Object.assign({}, incomingBus, match)
-                  : incomingBus;
+                if (match) {
+                  // merge ข้อมูล + แทน currentStationName ด้วย currentStation
+                  return Object.assign({}, incomingBus, match, {
+                    currentStationName: match.currentStation,
+                  });
+                } else {
+                  return incomingBus;
+                }
               });
 
               $scope.busStations = mergedBuses;
               console.log("✅ Merged and matched buses:", $scope.busStations);
 
-              // ถ้าต้องการเลือก bus ปัจจุบัน
+              // เลือก bus ปัจจุบัน
               if (mergedBuses.length > 0) {
-                $scope.selectedBus = [mergedBuses[0]]; // เลือกตัวแรก หรือเลือกตามเงื่อนไขอื่น
+                $scope.selectedBus = [mergedBuses[0]];
                 console.log("Selected bus:", $scope.selectedBus);
               } else {
                 $scope.selectedBus = [];
