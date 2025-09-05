@@ -1,53 +1,130 @@
-
-
-
+/* ===================== Bottom Sheet ===================== */
 .bus-line-sheet {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   background: #f4f4f4;
-  overflow-y: auto;
+  overflow: auto;
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
-  height: 30vh; /* ความสูงเริ่มต้น */
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
+
+.bus-line-sheet.expanded {
+  height: 80vh;
 }
 
 .bus-line-sheet::-webkit-scrollbar {
   display: none;
 }
 
-.font-SS {
-  font-size: 16px;
-  
+/* ===================== Drag Handle ===================== */
+.drag-handle-two {
+  position: sticky;
+  top: 0;
+  width: 50px;
+  height: 6px;
+  background: #ccc;
+  border-radius: 4px;
+  z-index: 1000;
+  margin: 10px auto;
+  display: block;
+  touch-action: none;
 }
 
+/* ===================== Fonts & Margins ===================== */
+.font-SS {
+  font-size: 16px;
+}
 .font-SXL {
   font-size: 24px;
+  font-weight: bold;
+}
+.font-xl {
+  font-size: 20px;
   font-weight: bold;
 }
 
 .m-l-12 {
   margin-left: 12px;
 }
-
 .m-t-10 {
   margin-top: 10px;
 }
-
-.drag-handle-two {
-  position: sticky;
-  top: 0; /* ติดด้านบน */
-  width: 50px;
-  height: 6px;
-  background: #ccc;
-  border-radius: 4px;
-  z-index: 1000;
-  margin: 0 auto;
-  display: block;
-  touch-action: none; 
+.mt-20 {
+  margin-top: 20px;
 }
+.mt-5 {
+  margin-top: 5px;
+}
+.mb-2 {
+  margin-bottom: 8px;
+}
+
+/* ===================== Step 1: รถที่ผ่าน ===================== */
+.bus-flex {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  border-radius: 16px;
+  padding: 10px;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.bus-box-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bus-arrow-destination {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.busline-station-box {
+  width: 120px;
+  padding: 5px 8px;
+  border-radius: 10px;
+  font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.arrival_time {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  color: #555;
+  background: #f4f4f4;
+  border-radius: 20px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.box-bus {
+  display: inline-block;
+  border: 1px solid #000;
+  border-radius: 20px;
+  padding: 4px 6px;
+  max-width: 120px;
+  white-space: normal;
+}
+
+/* ===================== Step 2: รายละเอียดสถานี ===================== */
+
 
 .bus-connector-pink {
   background-color: white;
@@ -65,128 +142,6 @@
   color: #00bfae;
 }
 
-.bus-flex {
-  position: relative; /* เพิ่มเพื่อให้ลูกหลาน absolute อยู่ภายใน */
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: white;
-  border-radius: 16px;
-  padding: 10px;
-  margin-top: 10px;
-  width: 90vh;
-}
-
-.arrival_time {
-  position: absolute;
-  top: 10px;
-  right: 16px;
-  color: #555;
-  background: #f4f4f4;
-  border-radius: 20px;
-  padding: 2px 8px;
-  white-space: nowrap;
-}
-
-.bus-box-container {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* กล่องห่อ arrow + destination */
-.bus-arrow-destination {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.bus-station-box {
-  width: 120px;
-  height: auto; /* ปรับให้สูงตามเนื้อหา */
-  padding: 5px 8px;
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: bold;
-  display: flex;
-  flex-direction: column; 
-  justify-content: center;
-  align-items: center;
-
-  white-space: normal; /* อนุญาตให้ขึ้นบรรทัดใหม่ */
-  overflow-wrap: break-word; /* ตัดคำถ้ายาวเกิน */
-  word-break: break-word;    /* รองรับคำยาวแบบไม่เว้นวรรค */
-  text-align: center;
-  line-height: 1.2; 
-}
 
 
 
-.bus-destination-info {
-  display: flex;
-  flex-direction: column;
-  margin-top: 0; 
-  line-height: 1.2;
-}
-
-.destination-info .font-gray {
-  margin-bottom: 4px; /* ระยะห่างระหว่าง "ปลายทาง" กับชื่อสถานี */
-  font-size: 12px;
-  color: #888;
-}
-
-.destination-info div:last-child {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.arrow-right {
-  width: 15px;
-  height: 15px;
-  vertical-align: middle;
-  margin-left: 8px;
-
-  /* ทำให้เป็นสีเทา */
-  filter: brightness(0) saturate(100%) invert(50%) sepia(0%) saturate(0%)
-    hue-rotate(180deg) brightness(90%) contrast(90%);
-  opacity: 0.6;
-  transition: opacity 0.2s ease-in-out;
-}
-
-.box-bus {
-  display: inline-block;     
-  border: 1px solid #000;
-  border-radius: 20px;
-  padding: 4px 6px;
-  max-width: 200px;          
-  white-space: normal;        /* อนุญาตให้ขึ้นบรรทัดใหม่ */
-  /* position: absolute;
-  top: 10px; */
-}
-
-
-.arrow-up-down{
-  background: none;
-  border: none;
-}
-
-
-.close-btn-tab {
-  position: absolute;
-  top: 12px;
-  right: 16px;
-  background: #e0e0e0;
-  border: none;
-  font-size: 16px;
-  color: #555;
-  cursor: pointer;
-  z-index: 10;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s, color 0.2s;
-}

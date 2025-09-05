@@ -1,29 +1,40 @@
-app.service('AuthenService', function ($http, $q) {
-    var API_TOKEN = "https://bmta.forthtrack.com/tracking_authenticationBMTA_UAT/token";
-    var API_USERINFO = "https://bmta.forthtrack.com/tracking_resourcebmta_UAT/api";
-    var basicAuth = "Basic Qk1UQV9BT1Q6VHJhY2tpbmcyMDI0";
+app.service("AuthenService", function ($http, $q) {
+  var API_TOKEN =
+    "https://bmta.forthtrack.com/tracking_authenticationBMTA_UAT/token";
 
-    // ฟังก์ชัน login
-   this.login = function (username, password) {
+  // Config สำหรับ login
+  function getLoginConfig() {
+    return {
+      headers: {
+        Authorization: "Basic Qk1UQV9BT1Q6VHJhY2tpbmcyMDI0",
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "application/json",
+      },
+    };
+  }
+
+  // ---------------- ฟังก์ชัน login ----------------
+  this.login = function (username, password) {
     var deferred = $q.defer();
 
-    var data = "grant_type=password&username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password);
+    var data =
+      "grant_type=password&username=" +
+      encodeURIComponent(username) +
+      "&password=" +
+      encodeURIComponent(password);
 
-    var config = {
-        headers: {
-            "Authorization": basicAuth,
-            "Content-Type": "application/x-www-form-urlencoded"
-        }
-    };
-
-    $http.post(API_TOKEN, data, config).then(function (response) {
+    $http.post(API_TOKEN, data, getLoginConfig()).then(
+      function (response) {
+        // บันทึก token ถ้าต้องการ
+        localStorage.setItem("access_token", response.data.access_token);
         deferred.resolve(response.data);
-    }, function (error) {
+      },
+      function (error) {
         deferred.reject(error);
-    });
+      }
+    );
 
     return deferred.promise;
-};
-
-
+  };
 });
+

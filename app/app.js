@@ -5,6 +5,7 @@ var app = angular.module("myApp", [
   "ngAria",
   "ngMessages",
   "oc.lazyLoad",
+  "ngTouch"
 ]);
 
 angular.module('myApp')
@@ -17,7 +18,7 @@ app.run(function ($rootScope, AuthenService) {
     var defaultUsername = "test_frontend";
     var defaultPassword = "Test1234!";
 
-    var today = new Date().toISOString().split('T')[0]; // รูปแบบ: YYYY-MM-DD
+    var today = new Date().toISOString().split('T')[0]; 
     var lastLoginDate = localStorage.getItem("login_date");
 
     if (lastLoginDate !== today || !localStorage.getItem("access_token")) {
@@ -25,7 +26,7 @@ app.run(function ($rootScope, AuthenService) {
         AuthenService.login(defaultUsername, defaultPassword).then(function (data) {
             console.log("🎉 Token ใหม่: ", data.access_token);
 
-            // เก็บ token และวันที่ login ไว้
+           
             $rootScope.token = data.access_token;
             localStorage.setItem("access_token", data.access_token);
             localStorage.setItem("login_date", today);
